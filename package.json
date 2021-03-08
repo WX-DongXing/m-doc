@@ -1,8 +1,8 @@
 {
   "name": "m-doc",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "A document management tool",
-  "main": "src/m-doc.js",
+  "main": "bin/m-doc.js",
   "author": {
     "name": "Dong Xing",
     "email": "dong.xing@outlook.com"
@@ -19,7 +19,7 @@
     "m-doc"
   ],
   "files": [
-    "src/*",
+    "lib/*",
     "public/*",
     "LICENSE",
     "README.md"
@@ -28,7 +28,10 @@
     "node": ">=12.20.0"
   },
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node bin/m-doc.js"
+  },
+  "bin": {
+    "m-doc": "bin/m-doc.js"
   },
   "devDependencies": {
     "eslint": "^7.21.0",
