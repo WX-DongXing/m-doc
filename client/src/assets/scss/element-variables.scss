@@ -1,0 +1,14 @@
+@import "theme";
+
+@font-face {
+  font-family: 'alibaba';
+  src: url('../font/Alibaba-PuHuiTi-Regular.ttf');
+}
+
+/* 改变主题色变量 */
+$--color-primary: $primary;
+
+/* 改变 icon 字体路径变量，必需 */
+$--font-path: '~element-plus/lib/theme-chalk/fonts';
+
+@import "~element-plus/packages/theme-chalk/src/index";
