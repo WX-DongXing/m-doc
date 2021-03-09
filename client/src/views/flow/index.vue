@@ -149,6 +149,7 @@ export default {
       handleAddRecord: () => {
         const record = new Record({})
         addRecord({ record })
+        state.socket && state.socket.send('SERVER|Add Record')
       },
       handlePrevious: throttle(() => {
         setRecordIndex({ index: state.recordIndex - 1 })
@@ -162,14 +163,19 @@ export default {
       methods.handleAddPage()
       methods.handleAddRecord()
 
-      state.socket = new WebSocket('ws://localhost:19364')
+      state.socket = new WebSocket('ws://localhost:12149')
 
-      state.socket.addEventListener('open', event => {
-        state.socket.send('Hello Server!')
+      state.socket.addEventListener('open', () => {
+        state.socket.send('CONNECTED|Server Socket was opened!')
       })
 
       state.socket.addEventListener('message', message => {
-        console.log('Server Message:', message)
+        const [eventName, data] = message.data.split('|')
+        console.log(`Message By Server
+-----------------
+EventName: ${eventName}
+Data: ${data}
+        `)
       })
     })
 
