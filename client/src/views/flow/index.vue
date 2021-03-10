@@ -50,6 +50,7 @@
             :key="record.id"
             :index="index + 1"
             :data="record"
+            :ref="el => { recordRefs[index] = el }"
           />
         </div>
         <!-- / page content -->
@@ -82,7 +83,7 @@
 
 <script>
 import { cloneDeep, throttle } from 'lodash'
-import { computed, reactive, toRefs, watch, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, reactive, toRefs, watch } from 'vue'
 import { useStore } from 'vuex'
 import MutationTypes from '@/store/mutation-types'
 import Page from '@/models/Page'
@@ -100,14 +101,15 @@ export default {
 
     const [
       addPage, setActivePage, updatePage, removePage,
-      addRecord, setRecordIndex
+      addRecord, setRecordIndex, setActiveGraph
     ] = useMutations([
       MutationTypes.ADD_PAGE,
       MutationTypes.SET_ACTIVE_PAGE,
       MutationTypes.UPDATE_PAGE,
       MutationTypes.REMOVE_PAGE,
       MutationTypes.ADD_RECORD,
-      MutationTypes.SET_RECORD_INDEX
+      MutationTypes.SET_RECORD_INDEX,
+      MutationTypes.SET_ACTIVE_GRAPH
     ])
 
     const state = reactive({
@@ -119,7 +121,8 @@ export default {
       treeProps: {
         children: 'children',
         label: 'title'
-      }
+      },
+      recordRefs: []
     })
 
     const methods = reactive({
@@ -149,7 +152,6 @@ export default {
       handleAddRecord: () => {
         const record = new Record({})
         addRecord({ record })
-        state.socket && state.socket.send('SERVER|Add Record')
       },
       handlePrevious: throttle(() => {
         setRecordIndex({ index: state.recordIndex - 1 })
@@ -162,30 +164,11 @@ export default {
     onMounted(() => {
       methods.handleAddPage()
       methods.handleAddRecord()
-
-      state.socket = new WebSocket('ws://localhost:12149')
-
-      state.socket.addEventListener('open', () => {
-        state.socket.send('CONNECTED|Server Socket was opened!')
-      })
-
-      state.socket.addEventListener('message', message => {
-        const [eventName, data] = message.data.split('|')
-        console.log(`Message By Server
------------------
-EventName: ${eventName}
-Data: ${data}
-        `)
-      })
-    })
-
-    onUnmounted(() => {
-      if (state.socket) {
-        state.socket.close()
-      }
+      setActiveGraph(state.recordRefs[0])
     })
 
     watch(() => state.recordIndex, (val, oldVal) => {
+      setActiveGraph(state.recordRefs[val])
       const { height } = state.container.parentNode.getBoundingClientRect()
       state.container.style.transformOrigin = `center ${oldVal * height + ((height - 145) / 2 + 121)}px`
       state.container.animate([

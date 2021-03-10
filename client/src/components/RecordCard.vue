@@ -79,55 +79,57 @@ export default {
         grid: true
       })
 
-      const model = {
-        nodes: [
-          {
-            id: 'node1', // String，可选，节点的唯一标识
-            shape: 'fn-group',
-            x: 40, // Number，必选，节点位置的 x 值
-            y: 40, // Number，必选，节点位置的 y 值
-            width: 180, // Number，可选，节点大小的 width 值
-            height: 180, // Number，可选，节点大小的 height 值
-            attrs: {
-              title: { text: 'init' },
-              desc: { text: '初始化' }
-            }
-          },
-          {
-            id: 'node2', // String，可选，节点的唯一标识
-            shape: 'fn-group',
-            x: 360, // Number，必选，节点位置的 x 值
-            y: 40, // Number，必选，节点位置的 y 值
-            width: 180, // Number，可选，节点大小的 width 值
-            height: 180, // Number，可选，节点大小的 height 值
-            attrs: {
-              title: { text: 'getDetail' },
-              desc: {
-                text: '获取详情'
-              }
-            }
-          }
-        ],
-        edges: [
-          {
-            source: 'node1',
-            target: 'node2',
-            router: {
-              name: 'orth'
-            },
-            attrs: {
-              line: {
-                targetMarker: {
-                  args: { size: 6 },
-                  name: 'block'
-                },
-                stroke: '#200097',
-                strokeWidth: 1
-              }
-            }
-          }
-        ]
-      }
+      // const model = {
+      //   nodes: [
+      //     {
+      //       id: 'node1', // String，可选，节点的唯一标识
+      //       shape: 'fn-group',
+      //       x: 40, // Number，必选，节点位置的 x 值
+      //       y: 40, // Number，必选，节点位置的 y 值
+      //       width: 180, // Number，可选，节点大小的 width 值
+      //       height: 180, // Number，可选，节点大小的 height 值
+      //       attrs: {
+      //         title: { text: 'init' },
+      //         desc: { text: '初始化' }
+      //       }
+      //     },
+      //     {
+      //       id: 'node2', // String，可选，节点的唯一标识
+      //       shape: 'fn-group',
+      //       x: 360, // Number，必选，节点位置的 x 值
+      //       y: 40, // Number，必选，节点位置的 y 值
+      //       width: 180, // Number，可选，节点大小的 width 值
+      //       height: 180, // Number，可选，节点大小的 height 值
+      //       attrs: {
+      //         title: { text: 'getDetail' },
+      //         desc: {
+      //           text: '获取详情'
+      //         }
+      //       }
+      //     }
+      //   ],
+      //   edges: [
+      //     {
+      //       source: 'node1',
+      //       target: 'node2',
+      //       router: {
+      //         name: 'orth'
+      //       },
+      //       attrs: {
+      //         line: {
+      //           targetMarker: {
+      //             args: { size: 6 },
+      //             name: 'block'
+      //           },
+      //           stroke: '#200097',
+      //           strokeWidth: 1
+      //         }
+      //       }
+      //     }
+      //   ]
+      // }
+
+      const model = {}
 
       const dagreLayout = new Layout({
         type: 'dagre',

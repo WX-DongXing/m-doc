@@ -4,12 +4,14 @@ export default class Record {
   constructor ({
     title = '未命名记录',
     desc = '',
-    data
+    nodes = [],
+    edges = []
   }) {
     this.id = shortid.generate()
     this.type = 'RECORD'
     this.title = title
     this.desc = desc
-    this.data = data
+    this.nodes = nodes
+    this.edges = edges
   }
 }

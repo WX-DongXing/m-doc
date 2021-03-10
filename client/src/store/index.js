@@ -5,10 +5,9 @@ import MutationTypes from '@/store/mutation-types'
 export default createStore({
   state: {
     source: [],
-    activePage: null,
     pageIndex: 0,
-    activeRecord: null,
-    recordIndex: 0
+    recordIndex: 0,
+    graph: null
   },
   mutations: {
     // 添加一页
@@ -71,7 +70,7 @@ export default createStore({
     [MutationTypes.SET_ACTIVE_RECORD] (state, payload) {
       if (!state.source[state.pageIndex]) return
       const { index, id } = payload
-      if (index && index >= 0) {
+      if (index >= 0) {
         state.recordIndex = index
       }
       if (id) {
@@ -85,7 +84,7 @@ export default createStore({
     [MutationTypes.UPDATE_RECORD] (state, payload) {
       if (!state.source[state.pageIndex]) return
       const { index, id, record } = payload
-      if (index && index >= 0) {
+      if (index >= 0) {
         state.source[state.pageIndex].children.splice(index, 1, record)
       }
       if (id) {
@@ -96,6 +95,11 @@ export default createStore({
     // 设置记录索引
     [MutationTypes.SET_RECORD_INDEX] (state, payload) {
       state.recordIndex = payload.index
+    },
+    // 设置激活绘制对象
+    [MutationTypes.SET_ACTIVE_GRAPH] (state, payload) {
+      state.graph = payload
+      console.log(payload, state.source[state.pageIndex].children[state.recordIndex])
     }
   },
   getters: {

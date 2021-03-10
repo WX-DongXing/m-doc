@@ -21,6 +21,64 @@
   </main>
 </template>
 
+<script>
+import { reactive, computed, toRefs, onMounted, onUnmounted } from 'vue'
+import { cloneDeep } from 'lodash'
+import { useMutations } from '@/utils'
+import MutationTypes from '@/store/mutation-types'
+import { useStore } from 'vuex'
+import Node from '@/models/Node'
+
+export default {
+  setup () {
+    const store = useStore()
+
+    const state = reactive({
+      socket: null,
+      activePage: computed(() => cloneDeep(store.getters.activePage)),
+      activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
+      recordIndex: computed(() => store.state.recordIndex)
+    })
+
+    const [updateRecord] = useMutations([
+      MutationTypes.UPDATE_RECORD
+    ])
+
+    onMounted(() => {
+      state.socket = new WebSocket('ws://localhost:12149')
+
+      state.socket.addEventListener('open', () => {
+        state.socket.send('CONNECTED|Server Socket was opened!')
+      })
+
+      state.socket.addEventListener('message', message => {
+        const [eventName, data] = message.data.split('|')
+        console.log(`Message By Server
+-----------------
+EventName: ${eventName}
+Data: ${data}
+        `)
+        if (state.activePage && state.activeRecord) {
+          const record = cloneDeep(state.activeRecord)
+          record.nodes.push(new Node(JSON.parse(data)))
+          updateRecord({ index: state.recordIndex, record })
+        }
+      })
+    })
+
+    onUnmounted(() => {
+      if (state.socket) {
+        state.socket.close()
+      }
+    })
+
+    return {
+      ...toRefs(state)
+    }
+  }
+}
+</script>
+
 <style lang="scss">
 @import '@/assets/scss/theme';
 
