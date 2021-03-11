@@ -7,7 +7,7 @@ export default class Node {
     shape = 'fn-group',
     width = 180,
     height = 180,
-    attr = {
+    attrs = {
       title: { text: '' },
       desc: { text: '' }
     },
@@ -21,7 +21,7 @@ export default class Node {
     this.shape = shape
     this.width = width
     this.height = height
-    this.attr = {
+    this.attrs = {
       title: { text: name },
       desc: { text: desc }
     }

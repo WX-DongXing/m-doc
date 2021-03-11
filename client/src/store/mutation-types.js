@@ -9,7 +9,8 @@ const MutationTypes = {
   UPDATE_RECORD: 'UPDATE RECORD [更新一条记录]',
   SET_ACTIVE_RECORD: 'SET ACTIVE RECORD [设置激活记录]',
   SET_RECORD_INDEX: 'SET RECORD INDEX [设置记录索引]',
-  SET_ACTIVE_GRAPH: 'SET ACTIVE GRAPH [设置激活绘制对象]'
+  SET_ACTIVE_GRAPH: 'SET ACTIVE GRAPH [设置激活绘制对象]',
+  UPDATE_GRAPH: 'UPDATE GRAPH [更新绘制对象]'
 }
 
 export default MutationTypes

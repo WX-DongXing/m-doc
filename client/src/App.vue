@@ -40,8 +40,9 @@ export default {
       recordIndex: computed(() => store.state.recordIndex)
     })
 
-    const [updateRecord] = useMutations([
-      MutationTypes.UPDATE_RECORD
+    const [updateRecord, updateGraph] = useMutations([
+      MutationTypes.UPDATE_RECORD,
+      MutationTypes.UPDATE_GRAPH
     ])
 
     onMounted(() => {
@@ -62,6 +63,7 @@ Data: ${data}
           const record = cloneDeep(state.activeRecord)
           record.nodes.push(new Node(JSON.parse(data)))
           updateRecord({ index: state.recordIndex, record })
+          updateGraph()
         }
       })
     })

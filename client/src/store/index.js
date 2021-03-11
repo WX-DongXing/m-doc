@@ -1,6 +1,8 @@
 import { omit } from 'lodash'
 import { createStore } from 'vuex'
 import MutationTypes from '@/store/mutation-types'
+import { Layout } from '@antv/layout'
+import { EDGE_PROPS } from '@/utils/constants'
 
 export default createStore({
   state: {
@@ -96,10 +98,42 @@ export default createStore({
     [MutationTypes.SET_RECORD_INDEX] (state, payload) {
       state.recordIndex = payload.index
     },
-    // 设置激活绘制对象
-    [MutationTypes.SET_ACTIVE_GRAPH] (state, payload) {
-      state.graph = payload
-      console.log(payload, state.source[state.pageIndex].children[state.recordIndex])
+    // 更新绘制对象
+    [MutationTypes.UPDATE_GRAPH] (state, payload) {
+      const updateGraphData = () => {
+        const activePage = state.source[state.pageIndex]
+        if (!activePage) return
+        const activeRecord = activePage.children[state.recordIndex]
+        if (activeRecord && state.graph) {
+          const { nodes, edges } = activeRecord
+          const dagreLayout = new Layout({
+            type: 'dagre',
+            rankdir: 'LR',
+            // align: 'DR',
+            ranksep: 64,
+            nodesep: 64,
+            controlPoints: true
+          })
+          let calcEdges = []
+          if (nodes.length > 1) {
+            const [node, lastNode] = nodes.slice(nodes.length - 2, nodes.length)
+            calcEdges = [
+              ...edges,
+              { source: node.id, target: lastNode.id, ...EDGE_PROPS }
+            ]
+            activeRecord.edges = calcEdges
+          }
+          const layoutModel = dagreLayout.layout({ nodes, edges: calcEdges })
+          state.graph.fromJSON(layoutModel)
+          state.graph.centerContent()
+        }
+      }
+      if (payload && payload.graph) {
+        state.graph = payload.graph
+        updateGraphData()
+      } else {
+        updateGraphData()
+      }
     }
   },
   getters: {

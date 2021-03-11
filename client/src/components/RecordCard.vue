@@ -2,6 +2,7 @@
   <div class="record-card">
     <div class="record-card__content">
       <div class="record-card__board" ref="board"></div>
+      <div class="record-card__map" ref="map"></div>
     </div>
     <footer class="record-card__footer">
       <div class="record-card__info">
@@ -35,7 +36,6 @@
 import { cloneDeep } from 'lodash'
 import { computed, reactive, toRefs, onMounted, onUnmounted } from 'vue'
 import { Graph } from '@antv/x6'
-import { Layout } from '@antv/layout'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import { FnGroup } from '@/utils/X6'
@@ -61,6 +61,7 @@ export default {
 
     const state = reactive({
       board: null,
+      map: null,
       graph: {},
       record: computed(() => cloneDeep(data.value)),
       recordNo: computed(() => index)
@@ -69,6 +70,14 @@ export default {
     const methods = reactive({
       handleUpdateRecord: () => {
         updateRecord({ id: data.value.id, record: state.record })
+      },
+      updateGraph: () => {
+        if (state.graph && state.record) {
+          const { nodes, edges } = state.record
+          const model = { nodes, edges }
+          const layoutModel = state.dagreLayout.layout(model)
+          state.graph.fromJSON(layoutModel)
+        }
       }
     })
 
@@ -76,78 +85,22 @@ export default {
       state.graph = new Graph({
         container: state.board,
         autoResize: true,
-        grid: true
+        grid: true,
+        scroller: true,
+        panning: true,
+        minimap: {
+          enabled: true,
+          container: state.map
+        },
+        mousewheel: {
+          enabled: true,
+          modifiers: ['ctrl', 'meta']
+        }
       })
-
-      // const model = {
-      //   nodes: [
-      //     {
-      //       id: 'node1', // String，可选，节点的唯一标识
-      //       shape: 'fn-group',
-      //       x: 40, // Number，必选，节点位置的 x 值
-      //       y: 40, // Number，必选，节点位置的 y 值
-      //       width: 180, // Number，可选，节点大小的 width 值
-      //       height: 180, // Number，可选，节点大小的 height 值
-      //       attrs: {
-      //         title: { text: 'init' },
-      //         desc: { text: '初始化' }
-      //       }
-      //     },
-      //     {
-      //       id: 'node2', // String，可选，节点的唯一标识
-      //       shape: 'fn-group',
-      //       x: 360, // Number，必选，节点位置的 x 值
-      //       y: 40, // Number，必选，节点位置的 y 值
-      //       width: 180, // Number，可选，节点大小的 width 值
-      //       height: 180, // Number，可选，节点大小的 height 值
-      //       attrs: {
-      //         title: { text: 'getDetail' },
-      //         desc: {
-      //           text: '获取详情'
-      //         }
-      //       }
-      //     }
-      //   ],
-      //   edges: [
-      //     {
-      //       source: 'node1',
-      //       target: 'node2',
-      //       router: {
-      //         name: 'orth'
-      //       },
-      //       attrs: {
-      //         line: {
-      //           targetMarker: {
-      //             args: { size: 6 },
-      //             name: 'block'
-      //           },
-      //           stroke: '#200097',
-      //           strokeWidth: 1
-      //         }
-      //       }
-      //     }
-      //   ]
-      // }
-
-      const model = {}
-
-      const dagreLayout = new Layout({
-        type: 'dagre',
-        rankdir: 'LR',
-        align: 'DR',
-        ranksep: 100,
-        nodesep: 100,
-        controlPoints: true
-      })
-
-      const layoutModel = dagreLayout.layout(model)
-
-      state.graph.fromJSON(layoutModel)
 
       state.graph.on('node:collapse', ({ node }) => {
         node.toggleCollapse()
         const collapsed = node.isCollapsed()
-        // eslint-disable-next-line no-unused-vars
         const collapse = (parent) => {
           const cells = parent.getChildren()
           if (cells) {
@@ -193,6 +146,7 @@ export default {
   margin-bottom: 24px;
 
   &__content {
+    position: relative;
     display: flex;
     height: calc(100vh - 233px);
     box-sizing: border-box;
@@ -203,6 +157,17 @@ export default {
     flex: 1;
     height: 100%;
     width: 100%;
+  }
+
+  &__map {
+    position: absolute;
+    width: 320px;
+    height: 200px;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    border: 1px solid $primary-light;
+    border-radius: 4px;
   }
 
   &__footer {

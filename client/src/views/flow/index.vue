@@ -83,7 +83,7 @@
 
 <script>
 import { cloneDeep, throttle } from 'lodash'
-import { computed, onMounted, reactive, toRefs, watch } from 'vue'
+import { computed, onMounted, reactive, toRefs, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import MutationTypes from '@/store/mutation-types'
 import Page from '@/models/Page'
@@ -101,7 +101,7 @@ export default {
 
     const [
       addPage, setActivePage, updatePage, removePage,
-      addRecord, setRecordIndex, setActiveGraph
+      addRecord, setRecordIndex, updateGraph
     ] = useMutations([
       MutationTypes.ADD_PAGE,
       MutationTypes.SET_ACTIVE_PAGE,
@@ -109,13 +109,14 @@ export default {
       MutationTypes.REMOVE_PAGE,
       MutationTypes.ADD_RECORD,
       MutationTypes.SET_RECORD_INDEX,
-      MutationTypes.SET_ACTIVE_GRAPH
+      MutationTypes.UPDATE_GRAPH
     ])
 
     const state = reactive({
       container: null,
       source: computed(() => store.state.source),
       activePage: computed(() => cloneDeep(store.getters.activePage)),
+      activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
       records: computed(() => store.getters.activePage?.children),
       recordIndex: computed(() => store.state.recordIndex),
       treeProps: {
@@ -152,6 +153,12 @@ export default {
       handleAddRecord: () => {
         const record = new Record({})
         addRecord({ record })
+        nextTick(() => {
+          const { recordIndex, recordRefs } = state
+          if (recordIndex === 0 && recordRefs.length) {
+            updateGraph(recordRefs[0])
+          }
+        })
       },
       handlePrevious: throttle(() => {
         setRecordIndex({ index: state.recordIndex - 1 })
@@ -163,12 +170,11 @@ export default {
 
     onMounted(() => {
       methods.handleAddPage()
-      methods.handleAddRecord()
-      setActiveGraph(state.recordRefs[0])
+      // methods.handleAddRecord()
     })
 
     watch(() => state.recordIndex, (val, oldVal) => {
-      setActiveGraph(state.recordRefs[val])
+      updateGraph(state.recordRefs[val])
       const { height } = state.container.parentNode.getBoundingClientRect()
       state.container.style.transformOrigin = `center ${oldVal * height + ((height - 145) / 2 + 121)}px`
       state.container.animate([

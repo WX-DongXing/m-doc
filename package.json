@@ -28,7 +28,9 @@
     "node": ">=12.20.0"
   },
   "scripts": {
-    "start": "node bin/m-doc.js"
+    "serve": "cd client && yarn serve",
+    "package": "cd client && yarn build",
+    "start": "m-doc -no-browser"
   },
   "bin": {
     "m-doc": "bin/m-doc.js"
