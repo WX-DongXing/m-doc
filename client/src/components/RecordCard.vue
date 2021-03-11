@@ -34,11 +34,12 @@
 
 <script>
 import { cloneDeep } from 'lodash'
-import { computed, reactive, toRefs, onMounted, onUnmounted } from 'vue'
+import { computed, reactive, toRefs, onMounted, onUnmounted, nextTick } from 'vue'
 import { Graph } from '@antv/x6'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import { FnGroup } from '@/utils/X6'
+import { Layout } from '@antv/layout'
 
 export default {
   name: 'RecordCard',
@@ -74,9 +75,17 @@ export default {
       updateGraph: () => {
         if (state.graph && state.record) {
           const { nodes, edges } = state.record
-          const model = { nodes, edges }
-          const layoutModel = state.dagreLayout.layout(model)
+          const dagreLayout = new Layout({
+            type: 'dagre',
+            rankdir: 'LR',
+            // align: 'DR',
+            ranksep: 64,
+            nodesep: 64,
+            controlPoints: true
+          })
+          const layoutModel = dagreLayout.layout({ nodes, edges })
           state.graph.fromJSON(layoutModel)
+          nextTick(() => state.graph.centerContent())
         }
       }
     })
@@ -97,7 +106,6 @@ export default {
           modifiers: ['ctrl', 'meta']
         }
       })
-
       state.graph.on('node:collapse', ({ node }) => {
         node.toggleCollapse()
         const collapsed = node.isCollapsed()
@@ -120,6 +128,8 @@ export default {
           }
         }
       })
+
+      methods.updateGraph()
     })
 
     onUnmounted(() => {

@@ -83,7 +83,7 @@
 
 <script>
 import { cloneDeep, throttle } from 'lodash'
-import { computed, onMounted, reactive, toRefs, watch, nextTick } from 'vue'
+import { computed, reactive, toRefs, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import MutationTypes from '@/store/mutation-types'
 import Page from '@/models/Page'
@@ -134,13 +134,15 @@ export default {
       },
       handleNodeClick: (node) => {
         if (node.type === 'PAGE') {
-          setActivePage({ id: node.id })
-          setRecordIndex({ index: 0 })
-        } else {
-          const index = state.records.findIndex(record => record.id === node.id)
-          if (~index) {
-            setRecordIndex({ index })
+          if (node.id !== state.activePage.id) {
+            setRecordIndex({ index: 0 })
           }
+          setActivePage({ id: node.id })
+        } else {
+          const { id, children } = state.source.find(page => page.id === node.parentId)
+          setActivePage({ id })
+          const index = children.findIndex(record => record.id === node.id)
+          setRecordIndex({ index })
         }
       },
       handleUpdatePage: () => {
@@ -151,7 +153,7 @@ export default {
         setActivePage()
       },
       handleAddRecord: () => {
-        const record = new Record({})
+        const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
         nextTick(() => {
           const { recordIndex, recordRefs } = state
@@ -166,11 +168,6 @@ export default {
       handleNext: throttle(() => {
         setRecordIndex({ index: state.recordIndex + 1 })
       }, 1000)
-    })
-
-    onMounted(() => {
-      methods.handleAddPage()
-      // methods.handleAddRecord()
     })
 
     watch(() => state.recordIndex, (val, oldVal) => {

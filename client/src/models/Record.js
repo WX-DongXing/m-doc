@@ -5,9 +5,11 @@ export default class Record {
     title = '未命名记录',
     desc = '',
     nodes = [],
-    edges = []
+    edges = [],
+    parentId
   }) {
     this.id = shortid.generate()
+    this.parentId = parentId
     this.type = 'RECORD'
     this.title = title
     this.desc = desc

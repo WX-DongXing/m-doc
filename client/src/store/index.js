@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 import MutationTypes from '@/store/mutation-types'
 import { Layout } from '@antv/layout'
 import { EDGE_PROPS } from '@/utils/constants'
+import { nextTick } from 'vue'
 
 export default createStore({
   state: {
@@ -57,7 +58,8 @@ export default createStore({
     },
     // 添加一条记录
     [MutationTypes.ADD_RECORD] (state, payload) {
-      if (!state.source[state.pageIndex]) return
+      const activePage = state.source[state.pageIndex]
+      if (!activePage) return
       state.source[state.pageIndex].children.push(payload.record)
     },
     // 移除一条记录
@@ -124,8 +126,8 @@ export default createStore({
             activeRecord.edges = calcEdges
           }
           const layoutModel = dagreLayout.layout({ nodes, edges: calcEdges })
-          state.graph.fromJSON(layoutModel)
-          state.graph.centerContent()
+          state.graph.fromJSON({ nodes, edges: calcEdges })
+          nextTick(() => state.graph.centerContent())
         }
       }
       if (payload && payload.graph) {
