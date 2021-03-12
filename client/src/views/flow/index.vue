@@ -51,16 +51,18 @@
             :index="index + 1"
             :data="record"
             :ref="el => { recordRefs[index] = el }"
+            @remove="handleRemoveRecord"
           />
-        </div>
-        <!-- / page content -->
-        <div class="flow__content flow__none" v-else>
-          <i class="el-icon-news"></i>
-          <p>暂无记录</p>
         </div>
 
       </section>
       <!-- E page content -->
+
+      <!-- / page content -->
+      <div class="flow__content flow__none" v-if="activePage?.children.length === 0">
+        <i class="el-icon-news"></i>
+        <p>暂无记录</p>
+      </div>
 
       <!-- S none page -->
       <section class="flow__none" v-else>
@@ -101,13 +103,14 @@ export default {
 
     const [
       addPage, setActivePage, updatePage, removePage,
-      addRecord, setRecordIndex, updateGraph
+      addRecord, removeRecord, setRecordIndex
     ] = useMutations([
       MutationTypes.ADD_PAGE,
       MutationTypes.SET_ACTIVE_PAGE,
       MutationTypes.UPDATE_PAGE,
       MutationTypes.REMOVE_PAGE,
       MutationTypes.ADD_RECORD,
+      MutationTypes.REMOVE_RECORD,
       MutationTypes.SET_RECORD_INDEX,
       MutationTypes.UPDATE_GRAPH
     ])
@@ -155,15 +158,12 @@ export default {
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })
         if (state.records.length) {
-          setRecordIndex({ index: state.recordIndex + 1 })
+          setRecordIndex({ index: state.records.length })
         }
         addRecord({ record })
-        nextTick(() => {
-          const { recordIndex, recordRefs } = state
-          if (recordIndex === 0 && recordRefs.length) {
-            updateGraph(recordRefs[0])
-          }
-        })
+      },
+      handleRemoveRecord: (record) => {
+        removeRecord(record)
       },
       handlePrevious: throttle(() => {
         setRecordIndex({ index: state.recordIndex - 1 })
@@ -174,7 +174,6 @@ export default {
     })
 
     watch(() => state.recordIndex, (val, oldVal) => {
-      updateGraph(state.recordRefs[val])
       const { height } = state.container.parentNode.getBoundingClientRect()
       state.container.style.transformOrigin = `center ${oldVal * height + ((height - 145) / 2 + 121)}px`
       state.container.animate([

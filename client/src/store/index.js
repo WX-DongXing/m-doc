@@ -65,8 +65,13 @@ export default createStore({
     // 移除一条记录
     [MutationTypes.REMOVE_RECORD] (state, payload) {
       if (!state.source[state.pageIndex]) return
-      const recordIndex = state.source[state.pageIndex].children.findIndex(record => record.id === payload.id)
+      const records = state.source[state.pageIndex].children
+      const recordIndex = records.findIndex(record => record.id === payload.id)
       if (~recordIndex) {
+        if (state.recordIndex === records.length - 1 && state.recordIndex > 0) {
+          state.recordIndex -= 1
+          nextTick(() => state.graph && state.graph.centerContent())
+        }
         state.source[state.pageIndex].children.splice(recordIndex, 1)
       }
     },
@@ -107,11 +112,16 @@ export default createStore({
         if (!activePage) return
         const activeRecord = activePage.children[state.recordIndex]
         if (activeRecord && state.graph) {
-          const { nodes } = activeRecord
-          const dagreLayout = new Layout({ type: 'dagre' })
-          const edges = formatEdges(nodes)
-          const layoutModel = dagreLayout.layout({ nodes, edges })
-          state.graph.fromJSON(layoutModel)
+          const { nodes, cells, needLayout } = activeRecord
+          let model = {}
+          if (needLayout) {
+            const edges = formatEdges(nodes)
+            const dagreLayout = new Layout({ type: 'dagre' })
+            model = dagreLayout.layout({ nodes, edges })
+          } else {
+            model = { cells }
+          }
+          state.graph.fromJSON(model)
           nextTick(() => state.graph.centerContent())
         }
       }

@@ -40,9 +40,8 @@ export default {
       recordIndex: computed(() => store.state.recordIndex)
     })
 
-    const [updateRecord, updateGraph] = useMutations([
-      MutationTypes.UPDATE_RECORD,
-      MutationTypes.UPDATE_GRAPH
+    const [updateRecord] = useMutations([
+      MutationTypes.UPDATE_RECORD
     ])
 
     onMounted(() => {
@@ -54,12 +53,10 @@ export default {
 
       state.socket.addEventListener('message', message => {
         const [eventName, data] = message.data.split('|')
-        console.log('Message By Server')
         if (state.activePage && state.activeRecord) {
           const record = cloneDeep(state.activeRecord)
           record.nodes.push(new Node(JSON.parse(data)))
           updateRecord({ index: state.recordIndex, record })
-          updateGraph()
         }
       })
     })

@@ -27,6 +27,9 @@
         </div>
       </div>
       <div class="record-card__actions">
+        <i class="el-icon-delete" @click="handleRemove"></i>
+        <i class="el-icon-files" @click="handleSave"></i>
+        <i class="el-icon-toilet-paper" @click="handleClear"></i>
       </div>
     </footer>
   </div>
@@ -34,7 +37,10 @@
 
 <script>
 import { cloneDeep } from 'lodash'
-import { computed, reactive, toRefs, onMounted, onUnmounted, nextTick } from 'vue'
+import {
+  computed, reactive, toRefs, onMounted,
+  onUnmounted, nextTick, watch
+} from 'vue'
 import { Graph } from '@antv/x6'
 import { formatEdges, useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
@@ -53,7 +59,7 @@ export default {
       default: 1
     }
   },
-  setup (props) {
+  setup (props, { emit }) {
     const { data, index } = toRefs(props)
 
     const [updateRecord] = useMutations([
@@ -74,13 +80,29 @@ export default {
       },
       updateGraph: () => {
         if (state.graph && state.record) {
-          const { nodes } = state.record
-          const dagreLayout = new Layout({ type: 'dagre' })
-          const edges = formatEdges(nodes)
-          const layoutModel = dagreLayout.layout({ nodes, edges })
-          state.graph.fromJSON(layoutModel)
+          const { nodes, cells, needLayout } = state.record
+          let model = {}
+          if (needLayout) {
+            const edges = formatEdges(nodes)
+            const dagreLayout = new Layout({ type: 'dagre' })
+            model = dagreLayout.layout({ nodes, edges })
+          } else {
+            model = { cells }
+          }
+          state.graph.fromJSON(model)
           nextTick(() => state.graph.centerContent())
         }
+      },
+      handleRemove: () => emit('remove', { id: state.record.id }),
+      handleSave: () => {
+        const { cells } = state.graph.toJSON()
+        const record = Object.assign(cloneDeep(state.record), { cells, needLayout: false })
+        updateRecord({ id: state.record.id, record })
+      },
+      handleClear: () => {
+        const record = Object.assign(cloneDeep(state.record), { nodes: [], edges: [] })
+        updateRecord({ id: state.record.id, record })
+        methods.updateGraph()
       }
     })
 
@@ -126,6 +148,10 @@ export default {
       methods.updateGraph()
     })
 
+    watch(() => state.record, (val, oldVal) => {
+      methods.updateGraph()
+    })
+
     onUnmounted(() => {
       state.graph.dispose()
     })
@@ -155,6 +181,7 @@ export default {
     height: calc(100vh - 233px);
     box-sizing: border-box;
     padding: 16px;
+    overflow: hidden;
   }
 
   &__board {
@@ -218,6 +245,23 @@ export default {
       &:nth-of-type(2) {
         font-size: 12px;
         color: $grey;
+      }
+    }
+  }
+
+  &__actions {
+    flex: none;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    align-items: center;
+    width: 200px;
+
+    i {
+      cursor: pointer;
+
+      &:hover {
+        color: $primary;
       }
     }
   }
