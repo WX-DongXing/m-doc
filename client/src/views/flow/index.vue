@@ -14,36 +14,36 @@
     <!-- E aside -->
 
     <div class="flow__container">
+      <div class="flow__header" v-if="activePage">
+        <div class="flow__info">
+          <input
+            type="text"
+            name="title"
+            placeholder="标题"
+            autocomplete="off"
+            class="flow__title"
+            v-model="activePage.title"
+            @input="handleUpdatePage"
+          >
+          <input
+            type="text"
+            name="desc"
+            placeholder="描述"
+            autocomplete="off"
+            class="flow__desc"
+            v-model="activePage.desc"
+            @input="handleUpdatePage"
+          >
+        </div>
+        <div>
+          <i class="el-icon-close flow__close" @click="handleRemovePage"></i>
+          <i class="el-icon-plus flow__close" @click="handleAddRecord"></i>
+        </div>
+      </div>
+      <!-- / page header -->
+
       <!-- S page content -->
       <section class="flow__page" ref="container" v-if="activePage">
-        <div class="flow__header">
-          <div class="flow__info">
-            <input
-              type="text"
-              name="title"
-              placeholder="标题"
-              autocomplete="off"
-              class="flow__title"
-              v-model="activePage.title"
-              @input="handleUpdatePage"
-            >
-            <input
-              type="text"
-              name="desc"
-              placeholder="描述"
-              autocomplete="off"
-              class="flow__desc"
-              v-model="activePage.desc"
-              @input="handleUpdatePage"
-            >
-          </div>
-          <div>
-            <i class="el-icon-close flow__close" @click="handleRemovePage"></i>
-            <i class="el-icon-plus flow__close" @click="handleAddRecord"></i>
-          </div>
-        </div>
-        <!-- / page header -->
-
         <div class="flow__content" v-if="activePage?.children.length > 0">
           <record-card
             v-for="(record, index) of records"
@@ -154,6 +154,9 @@ export default {
       },
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })
+        if (state.records.length) {
+          setRecordIndex({ index: state.recordIndex + 1 })
+        }
         addRecord({ record })
         nextTick(() => {
           const { recordIndex, recordRefs } = state
@@ -224,6 +227,7 @@ export default {
   }
 
   &__header {
+    position: relative;
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
@@ -231,6 +235,8 @@ export default {
     box-sizing: border-box;
     padding: 12px 64px;
     margin-bottom: 16px;
+    z-index: 2;
+    background: $white;
   }
 
   &__info {

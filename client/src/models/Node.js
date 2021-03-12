@@ -11,7 +11,9 @@ export default class Node {
       title: { text: '' },
       desc: { text: '' }
     },
+    file = {},
     loc = {},
+    fnList = [],
     children = []
   }) {
     this.id = shortid.generate()
@@ -25,7 +27,9 @@ export default class Node {
       title: { text: name },
       desc: { text: desc }
     }
+    this.file = file
     this.loc = loc
+    this.fnList = fnList
     this.children = children
   }
 }

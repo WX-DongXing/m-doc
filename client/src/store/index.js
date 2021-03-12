@@ -2,7 +2,7 @@ import { omit } from 'lodash'
 import { createStore } from 'vuex'
 import MutationTypes from '@/store/mutation-types'
 import { Layout } from '@antv/layout'
-import { EDGE_PROPS } from '@/utils/constants'
+import { formatEdges } from '@/utils'
 import { nextTick } from 'vue'
 
 export default createStore({
@@ -107,26 +107,11 @@ export default createStore({
         if (!activePage) return
         const activeRecord = activePage.children[state.recordIndex]
         if (activeRecord && state.graph) {
-          const { nodes, edges } = activeRecord
-          const dagreLayout = new Layout({
-            type: 'dagre',
-            rankdir: 'LR',
-            // align: 'DR',
-            ranksep: 64,
-            nodesep: 64,
-            controlPoints: true
-          })
-          let calcEdges = []
-          if (nodes.length > 1) {
-            const [node, lastNode] = nodes.slice(nodes.length - 2, nodes.length)
-            calcEdges = [
-              ...edges,
-              { source: node.id, target: lastNode.id, ...EDGE_PROPS }
-            ]
-            activeRecord.edges = calcEdges
-          }
-          const layoutModel = dagreLayout.layout({ nodes, edges: calcEdges })
-          state.graph.fromJSON({ nodes, edges: calcEdges })
+          const { nodes } = activeRecord
+          const dagreLayout = new Layout({ type: 'dagre' })
+          const edges = formatEdges(nodes)
+          const layoutModel = dagreLayout.layout({ nodes, edges })
+          state.graph.fromJSON(layoutModel)
           nextTick(() => state.graph.centerContent())
         }
       }

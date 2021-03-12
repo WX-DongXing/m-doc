@@ -54,11 +54,7 @@ export default {
 
       state.socket.addEventListener('message', message => {
         const [eventName, data] = message.data.split('|')
-        console.log(`Message By Server
------------------
-EventName: ${eventName}
-Data: ${data}
-        `)
+        console.log('Message By Server')
         if (state.activePage && state.activeRecord) {
           const record = cloneDeep(state.activeRecord)
           record.nodes.push(new Node(JSON.parse(data)))
@@ -111,7 +107,7 @@ aside {
   flex: none;
   height: 100vh;
   width: 56px;
-  background: #f7fafc;
+  background: $white;
 
   i {
     font-size: 24px;

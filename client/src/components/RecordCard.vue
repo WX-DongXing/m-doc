@@ -36,7 +36,7 @@
 import { cloneDeep } from 'lodash'
 import { computed, reactive, toRefs, onMounted, onUnmounted, nextTick } from 'vue'
 import { Graph } from '@antv/x6'
-import { useMutations } from '@/utils'
+import { formatEdges, useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import { FnGroup } from '@/utils/X6'
 import { Layout } from '@antv/layout'
@@ -74,15 +74,9 @@ export default {
       },
       updateGraph: () => {
         if (state.graph && state.record) {
-          const { nodes, edges } = state.record
-          const dagreLayout = new Layout({
-            type: 'dagre',
-            rankdir: 'LR',
-            // align: 'DR',
-            ranksep: 64,
-            nodesep: 64,
-            controlPoints: true
-          })
+          const { nodes } = state.record
+          const dagreLayout = new Layout({ type: 'dagre' })
+          const edges = formatEdges(nodes)
           const layoutModel = dagreLayout.layout({ nodes, edges })
           state.graph.fromJSON(layoutModel)
           nextTick(() => state.graph.centerContent())
@@ -171,13 +165,14 @@ export default {
 
   &__map {
     position: absolute;
-    width: 320px;
-    height: 200px;
+    width: 300px;
+    height: 205px;
     top: 0;
     right: 0;
     z-index: 1;
     border: 1px solid $primary-light;
     border-radius: 4px;
+    overflow: hidden;
   }
 
   &__footer {
