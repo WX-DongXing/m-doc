@@ -112,16 +112,31 @@ export default createStore({
         if (!activePage) return
         const activeRecord = activePage.children[state.recordIndex]
         if (activeRecord && state.graph) {
-          const { nodes, cells, needLayout } = activeRecord
-          let model = {}
-          if (needLayout) {
-            const edges = formatEdges(nodes)
+          const { nodes, edges } = state.record
+          const { needLayoutNodes, layoutNodes } = nodes.reduce((acc, cur) => {
+            if (cur.position) {
+              acc.layoutNodes.push(cur)
+            } else {
+              acc.needLayoutNodes.push(cur)
+            }
+            return acc
+          }, { needLayoutNodes: [], layoutNodes: [] })
+          let model = { nodes: [], edges: [] }
+          if (needLayoutNodes.length) {
+            const calcEdges = formatEdges(needLayoutNodes)
             const dagreLayout = new Layout({ type: 'dagre' })
-            model = dagreLayout.layout({ nodes, edges })
-          } else {
-            model = { cells }
+            model = dagreLayout.layout({ nodes: needLayoutNodes, edges: calcEdges })
+            if (layoutNodes.length) {
+              const maxX = Math.max(...layoutNodes.map(node => node.position.x))
+              model.nodes.forEach(node => {
+                node.x += maxX + 120
+              })
+            }
           }
-          state.graph.fromJSON(model)
+          state.graph.fromJSON({
+            nodes: [...layoutNodes, ...model.nodes],
+            edges: [...edges, ...model.edges]
+          })
           nextTick(() => state.graph.centerContent())
         }
       }

@@ -39,7 +39,7 @@
 import { cloneDeep } from 'lodash'
 import {
   computed, reactive, toRefs, onMounted,
-  onUnmounted, nextTick, watch
+  nextTick, watch
 } from 'vue'
 import { Graph } from '@antv/x6'
 import { formatEdges, useMutations } from '@/utils'
@@ -78,31 +78,54 @@ export default {
       handleUpdateRecord: () => {
         updateRecord({ id: data.value.id, record: state.record })
       },
-      updateGraph: () => {
+      render: () => {
         if (state.graph && state.record) {
-          const { nodes, cells, needLayout } = state.record
-          let model = {}
-          if (needLayout) {
-            const edges = formatEdges(nodes)
+          const { nodes, edges } = state.record
+          const { needLayoutNodes, layoutNodes } = nodes.reduce((acc, cur) => {
+            if (cur.position) {
+              acc.layoutNodes.push(cur)
+            } else {
+              acc.needLayoutNodes.push(cur)
+            }
+            return acc
+          }, { needLayoutNodes: [], layoutNodes: [] })
+          let model = { nodes: [], edges: [] }
+          if (needLayoutNodes.length) {
+            const calcEdges = formatEdges(needLayoutNodes)
             const dagreLayout = new Layout({ type: 'dagre' })
-            model = dagreLayout.layout({ nodes, edges })
-          } else {
-            model = { cells }
+            model = dagreLayout.layout({ nodes: needLayoutNodes, edges: calcEdges })
+            if (layoutNodes.length) {
+              const maxX = Math.max(...layoutNodes.map(node => node.position.x))
+              model.nodes.forEach(node => {
+                node.x += maxX + 120
+              })
+            }
           }
-          state.graph.fromJSON(model)
+          state.graph.fromJSON({
+            nodes: [...layoutNodes, ...model.nodes],
+            edges: [...edges, ...model.edges]
+          })
           nextTick(() => state.graph.centerContent())
         }
       },
       handleRemove: () => emit('remove', { id: state.record.id }),
       handleSave: () => {
         const { cells } = state.graph.toJSON()
-        const record = Object.assign(cloneDeep(state.record), { cells, needLayout: false })
+        const { nodes, edges } = cells.reduce((acc, cur) => {
+          if (cur.type && cur.type === 'NODE') {
+            acc.nodes.push(cur)
+          } else {
+            acc.edges.push(cur)
+          }
+          return acc
+        }, { nodes: [], edges: [] })
+        const record = Object.assign(cloneDeep(state.record), { nodes, edges })
         updateRecord({ id: state.record.id, record })
       },
       handleClear: () => {
         const record = Object.assign(cloneDeep(state.record), { nodes: [], edges: [] })
         updateRecord({ id: state.record.id, record })
-        methods.updateGraph()
+        methods.render()
       }
     })
 
@@ -145,15 +168,11 @@ export default {
         }
       })
 
-      methods.updateGraph()
+      methods.render()
     })
 
     watch(() => state.record, (val, oldVal) => {
-      methods.updateGraph()
-    })
-
-    onUnmounted(() => {
-      state.graph.dispose()
+      methods.render()
     })
 
     return {
