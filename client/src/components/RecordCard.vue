@@ -4,6 +4,11 @@
       <div class="record-card__board" ref="board"></div>
       <div class="record-card__map" ref="map"></div>
     </div>
+    <div class="record-card__actions">
+      <i class="el-icon-delete" @click="handleRemove"></i>
+      <i class="el-icon-files" @click="handleSave"></i>
+      <i class="el-icon-toilet-paper" @click="handleClear"></i>
+    </div>
   </div>
 </template>
 
@@ -163,7 +168,6 @@ export default {
   height: calc(100vh - 160px);
   border-radius: 4px;
   background: #f5f5fa;
-  //box-shadow: 0 16px 48px #e7ebf6;
 
   &__content {
     position: relative;
@@ -183,12 +187,12 @@ export default {
   &__map {
     position: absolute;
     width: 240px;
-    top: 0;
-    right: 0;
+    top: 16px;
+    right: 16px;
     z-index: 1;
-    border: 1px solid $primary-light;
     border-radius: 4px;
     overflow: hidden;
+    box-shadow: 0 16px 32px #cbcfdb, -16px 0 32px #cbcfdb;
   }
 
   &__footer {
@@ -239,12 +243,19 @@ export default {
   }
 
   &__actions {
-    flex: none;
+    position: absolute;
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: column nowrap;
     justify-content: space-around;
     align-items: center;
-    width: 200px;
+    height: 200px;
+    width: 36px;
+    z-index: 2;
+    top: 16px;
+    left: 16px;
+    background: rgba(255, 255, 255, .8);
+    border-radius: 4px;
+    box-shadow: 0 16px 32px #cbcfdb, -16px 0 32px #cbcfdb;
 
     i {
       cursor: pointer;
