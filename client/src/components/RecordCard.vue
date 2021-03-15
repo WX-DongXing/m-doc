@@ -4,34 +4,6 @@
       <div class="record-card__board" ref="board"></div>
       <div class="record-card__map" ref="map"></div>
     </div>
-    <footer class="record-card__footer">
-      <div class="record-card__info">
-        <h3>{{ recordNo }}</h3>
-        <div class="record-card__inputs">
-          <input
-            type="text"
-            name="title"
-            placeholder="标题"
-            autocomplete="off"
-            v-model="record.title"
-            @input="handleUpdateRecord"
-          >
-          <input
-            type="text"
-            name="desc"
-            placeholder="描述"
-            autocomplete="off"
-            v-model="record.desc"
-            @input="handleUpdateRecord"
-          >
-        </div>
-      </div>
-      <div class="record-card__actions">
-        <i class="el-icon-delete" @click="handleRemove"></i>
-        <i class="el-icon-files" @click="handleSave"></i>
-        <i class="el-icon-toilet-paper" @click="handleClear"></i>
-      </div>
-    </footer>
   </div>
 </template>
 
@@ -132,7 +104,7 @@ export default {
     onMounted(() => {
       state.graph = new Graph({
         container: state.board,
-        autoResize: true,
+        autoResize: false,
         grid: true,
         scroller: true,
         panning: true,
@@ -188,16 +160,15 @@ export default {
 
 .record-card {
   width: 100%;
-  height: calc(100vh - 169px);
+  height: calc(100vh - 160px);
   border-radius: 4px;
-  background: rgba(255, 255, 255, .4);
-  box-shadow: 0 16px 48px #e7ebf6;
-  margin-bottom: 24px;
+  background: #f5f5fa;
+  //box-shadow: 0 16px 48px #e7ebf6;
 
   &__content {
     position: relative;
     display: flex;
-    height: calc(100vh - 233px);
+    height: calc(100vh - 160px);
     box-sizing: border-box;
     padding: 16px;
     overflow: hidden;
@@ -211,8 +182,7 @@ export default {
 
   &__map {
     position: absolute;
-    width: 300px;
-    height: 205px;
+    width: 240px;
     top: 0;
     right: 0;
     z-index: 1;

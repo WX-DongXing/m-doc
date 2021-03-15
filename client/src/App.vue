@@ -1,50 +1,42 @@
 <template>
-  <aside>
-    <i class="el-icon-bangzhu logo"></i>
-
-    <div class="menu">
-      <el-tooltip effect="dark" content="文档" placement="right">
-        <router-link to="/" class="menu__item">
-          <i class="el-icon-reading"></i>
-        </router-link>
-      </el-tooltip>
-      <el-tooltip effect="dark" content="历史" placement="right">
-        <router-link to="/history" class="menu__item">
-          <i class="el-icon-timer"></i>
-        </router-link>
-      </el-tooltip>
-    </div>
-  </aside>
-
   <main class="main">
     <router-view></router-view>
   </main>
 </template>
 
 <script>
-import { reactive, computed, toRefs, onMounted, onUnmounted } from 'vue'
+import { reactive, computed, toRefs, onMounted, onUnmounted, watch } from 'vue'
 import { cloneDeep } from 'lodash'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import { useStore } from 'vuex'
 import Node from '@/models/Node'
+import { useRoute } from 'vue-router'
 
 export default {
   setup () {
     const store = useStore()
+    const route = useRoute()
 
     const state = reactive({
       socket: null,
       source: computed(() => cloneDeep(store.state.source)),
       activePage: computed(() => cloneDeep(store.getters.activePage)),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
-      recordIndex: computed(() => store.state.recordIndex)
+      recordIndex: computed(() => store.state.recordIndex),
+      pageId: computed(() => route.params.id),
+      index: computed(() => route.params.index)
     })
 
-    const [updateSource, setSocket, updateRecord] = useMutations([
+    const [
+      updateSource, setSocket, updateRecord,
+      setPageIndex, setRecordIndex
+    ] = useMutations([
       MutationTypes.UPDATE_SOURCE,
       MutationTypes.SET_SOCKET,
-      MutationTypes.UPDATE_RECORD
+      MutationTypes.UPDATE_RECORD,
+      MutationTypes.SET_PAGE_INDEX,
+      MutationTypes.SET_RECORD_INDEX
     ])
 
     onMounted(() => {
@@ -75,6 +67,18 @@ export default {
             break
         }
       })
+    })
+
+    watch(() => [state.pageId, state.index, state.source], ([id, index, source]) => {
+      if (source && source.length) {
+        if (id) {
+          const pageIndex = state.source.findIndex(page => page.id === id)
+          if (~pageIndex) {
+            setPageIndex({ index: pageIndex })
+          }
+        }
+        if (+index >= 0) setRecordIndex({ index })
+      }
     })
 
     onUnmounted(() => {
@@ -109,63 +113,15 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: rgb(35, 38, 59);
 
   input {
     font-family: alibaba, Avenir, Helvetica, Arial, sans-serif;
   }
 }
 
-aside {
-  flex: none;
-  height: 100vh;
-  width: 56px;
-  background: $white;
-
-  i {
-    font-size: 24px;
-    color: #2c3e50;
-  }
-
-  .logo {
-    margin-top: 16px;
-  }
-
-  .menu {
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    margin-top: 24px;
-
-    &__item {
-      height: 48px;
-      width: calc(100% - 4px);
-      cursor: pointer;
-      line-height: 56px;
-      text-decoration: none;
-      border-right: 2px solid transparent;
-      border-left: 2px solid transparent;
-
-      &:hover {
-        background: #ecf5ff;
-      }
-
-      &.router-link-exact-active {
-        border-right: 2px solid $primary;
-
-        i {
-          color: $primary;
-        }
-      }
-    }
-  }
-}
-
 main {
   height: 100vh;
   width: 100%;
-  background: #f7fafc;
 }
 </style>

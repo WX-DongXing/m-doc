@@ -1,10 +1,10 @@
 <template>
-  <p>history</p>
+  <router-view></router-view>
 </template>
 
 <script>
 export default {
-  name: 'History'
+  name: 'EmptyLayout'
 }
 </script>
 
