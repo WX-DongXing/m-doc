@@ -35,28 +35,44 @@ export default {
 
     const state = reactive({
       socket: null,
+      source: computed(() => cloneDeep(store.state.source)),
       activePage: computed(() => cloneDeep(store.getters.activePage)),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
       recordIndex: computed(() => store.state.recordIndex)
     })
 
-    const [updateRecord] = useMutations([
+    const [updateSource, setSocket, updateRecord] = useMutations([
+      MutationTypes.UPDATE_SOURCE,
+      MutationTypes.SET_SOCKET,
       MutationTypes.UPDATE_RECORD
     ])
 
     onMounted(() => {
       state.socket = new WebSocket('ws://localhost:12149')
 
+      setSocket(state.socket)
+
       state.socket.addEventListener('open', () => {
-        state.socket.send('CONNECTED|Server Socket was opened!')
+        state.socket.emit('CONNECTED', 'Server Socket was opened!')
+        state.socket.emit('FETCH')
       })
 
       state.socket.addEventListener('message', message => {
-        const [eventName, data] = message.data.split('|')
-        if (state.activePage && state.activeRecord) {
-          const record = cloneDeep(state.activeRecord)
-          record.nodes.push(new Node(JSON.parse(data)))
-          updateRecord({ index: state.recordIndex, record })
+        const [event, data] = message.data.split('|')
+        switch (event) {
+          case 'UPDATE':
+            updateSource(JSON.parse(data))
+            break
+          case 'STORAGE':
+            state.socket.emit('STORAGE', state.source)
+            break
+          case 'RECORD':
+            if (state.activePage && state.activeRecord) {
+              const record = cloneDeep(state.activeRecord)
+              record.nodes.push(new Node(JSON.parse(data)))
+              updateRecord({ index: state.recordIndex, record })
+            }
+            break
         }
       })
     })

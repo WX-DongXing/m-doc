@@ -11,6 +11,11 @@ export function useMutations (mutations) {
   return Object.values(mapMutations({ ...mutations })).map(fn => fn.bind({ $store }))
 }
 
+/**
+ * 格式化节点结构计算边对象
+ * @param params
+ * @returns {[]}
+ */
 export function formatEdges (params) {
   const nodes = cloneDeep(params)
   const edges = []

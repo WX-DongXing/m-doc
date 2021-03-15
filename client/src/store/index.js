@@ -10,9 +10,18 @@ export default createStore({
     source: [],
     pageIndex: 0,
     recordIndex: 0,
-    graph: null
+    graph: null,
+    socket: null
   },
   mutations: {
+    // 更新源数据
+    [MutationTypes.UPDATE_SOURCE] (state, payload) {
+      Object.assign(state, payload)
+    },
+    // 设置socket对象
+    [MutationTypes.SET_SOCKET] (state, payload) {
+      state.socket = payload
+    },
     // 添加一页
     [MutationTypes.ADD_PAGE] (state, payload) {
       state.source.push(payload.page)

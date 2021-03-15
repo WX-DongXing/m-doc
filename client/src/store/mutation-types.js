@@ -1,4 +1,6 @@
 const MutationTypes = {
+  UPDATE_SOURCE: 'UPDATE SOURCE [更新源数据]',
+  SET_SOCKET: 'SET_SOCKET [设置socket对象]',
   ADD_PAGE: 'ADD PAGE [添加一页]',
   REMOVE_PAGE: 'REMOVE PAGE [移除一页]',
   UPDATE_PAGE: 'UPDATE PAGE [更新一页]',

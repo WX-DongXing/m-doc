@@ -5,7 +5,10 @@
     <aside class="flow__aside">
       <div class="flow__name">
         <h3>Flow</h3>
-        <i class="el-icon-plus" @click="handleAddPage"></i>
+        <div class="flow__menus">
+          <i class="el-icon-sell" @click="handleStorage"></i>
+          <i class="el-icon-plus" @click="handleAddPage"></i>
+        </div>
       </div>
       <div class="flow__tree">
         <el-tree :data="source" :props="treeProps" @node-click="handleNodeClick"></el-tree>
@@ -118,6 +121,7 @@ export default {
     const state = reactive({
       container: null,
       source: computed(() => store.state.source),
+      socket: computed(() => store.state.socket),
       activePage: computed(() => cloneDeep(store.getters.activePage)),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
       records: computed(() => store.getters.activePage?.children),
@@ -130,6 +134,9 @@ export default {
     })
 
     const methods = reactive({
+      handleStorage: () => {
+        state.socket.emit('STORAGE', { source: state.source })
+      },
       handleAddPage: () => {
         const page = new Page({})
         addPage({ page })
@@ -254,6 +261,16 @@ export default {
   &__close {
     font-size: 24px;
     cursor: pointer;
+  }
+
+  &__menus {
+    i + i {
+      margin-left: 12px;
+    }
+
+    i:hover {
+      color: $primary-dark;
+    }
   }
 
   &__name {
