@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { cloneDeep } from 'lodash'
+import { cloneDeep, uniqWith } from 'lodash'
 import {
   computed, reactive, toRefs, onMounted,
   nextTick, watch
@@ -52,9 +52,6 @@ export default {
     })
 
     const methods = reactive({
-      handleUpdateRecord: () => {
-        updateRecord({ id: data.value.id, record: state.record })
-      },
       render: () => {
         if (state.graph && state.record) {
           const { nodes, edges } = state.record
@@ -84,6 +81,9 @@ export default {
           })
           nextTick(() => state.graph.centerContent())
         }
+      },
+      handleUpdateRecord: () => {
+        updateRecord({ id: data.value.id, record: state.record })
       },
       handleRemove: () => emit('remove', { id: state.record.id }),
       handleSave: () => {
@@ -186,7 +186,7 @@ export default {
 
   &__map {
     position: absolute;
-    width: 240px;
+    width: 300px;
     top: 16px;
     right: 16px;
     z-index: 1;

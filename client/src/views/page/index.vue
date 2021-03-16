@@ -104,7 +104,7 @@ export default {
   aside {
     flex: none;
     width: 320px;
-    background: #f5f5fa;
+    background: $back-color;
   }
 
   section {
@@ -113,7 +113,7 @@ export default {
     overflow: hidden;
     background: white;
     box-sizing: border-box;
-    padding: 12px 32px;
+    padding: 12px 48px;
   }
 
   &__menus {
