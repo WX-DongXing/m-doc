@@ -1,10 +1,10 @@
 <template>
   <div class="doc-panel" v-for="(doc, index) in docs" :key="index">
-    <h3 class="doc-panel__title">{{ doc.title }}</h3>
+    <h3 class="doc-panel__title">{{ doc.name }}</h3>
 
     <p class="doc-panel__desc">{{ doc.desc }}</p>
 
-    <div v-if="doc.param">
+    <div class="doc-panel__row" v-if="doc.params.length">
       <p class="doc-panel__subtitle">Params</p>
       <div class="doc-panel__params">
         <el-table
@@ -13,14 +13,14 @@
           size="small"
           style="width: 100%">
           <el-table-column
-            prop="type"
-            label="Type"
-            width="180">
-          </el-table-column>
-          <el-table-column
             prop="value"
             label="Value"
-            width="180">
+            width="120">
+          </el-table-column>
+          <el-table-column
+            prop="type"
+            label="Type"
+            width="120">
           </el-table-column>
           <el-table-column
             prop="desc"
@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <div v-if="doc.returns">
+    <div class="doc-panel__row" v-if="doc.returns">
       <p class="doc-panel__subtitle">Returns</p>
       <div class="doc-panel__content">
         <p class="doc-panel__returns">
@@ -40,15 +40,18 @@
       </div>
     </div>
 
-    <div v-if="doc.example">
+    <div  class="doc-panel__row" v-if="doc.example">
       <p class="doc-panel__subtitle">Example</p>
       <div class="doc-panel__example">{{ doc.example }}</div>
     </div>
 
-    <p class="doc-panel__subtitle">Path</p>
-    <div class="doc-panel__content">
-      <p class="doc-panel__filename">{{ doc.file.filename }}</p>
+    <div class="doc-panel__row" v-if="doc.file && doc.file.filename">
+      <p class="doc-panel__subtitle">Path</p>
+      <div class="doc-panel__content">
+        <p class="doc-panel__filename">{{ doc.file.filename }}</p>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -93,8 +96,15 @@ export default {
   box-sizing: border-box;
   padding: 16px;
 
+  &__row {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
   &__title {
-    font-size: 20px;
+    font-size: 18px;
     margin: 0 0 6px;
   }
 

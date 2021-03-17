@@ -36,11 +36,13 @@ import { cloneDeep } from 'lodash'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import Record from '@/models/Record'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'Overview',
   setup () {
     const store = useStore()
+    const router = useRouter()
 
     const [
       setActivePage, updatePage, removePage,
@@ -68,6 +70,7 @@ export default {
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
+        router.push({ name: 'Record', params: { id: state.activePage.id, index: state.activePage.children.length - 1 } })
       }
     })
 
