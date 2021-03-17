@@ -33,11 +33,7 @@
       </el-tab-pane>
       <el-tab-pane label="文档" name="DOCS" class="record__panel">
         <div class="record__docs">
-          <doc-panel
-            v-for="(doc, index) in docs"
-            :key="index"
-            :doc="doc"
-          ></doc-panel>
+          <doc-panel :data="activeRecord" v-if="activeRecord.id"></doc-panel>
         </div>
         <div class="record__actions"></div>
       </el-tab-pane>
@@ -92,31 +88,11 @@ export default {
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
-      },
-      formatDocs: () => {
-        // const { nodes } = state.record
-        // const funcList = uniqWith(nodes, (val, other) => other.name === val.name && other.file.filename === val.file.filename)
-        state.docs = [
-          {
-            title: 'main',
-            desc: 'this is main methods',
-            params: [
-              { type: 'String', value: 'a', desc: 'this is a' },
-              { type: 'Number', value: 'b', desc: 'this is b' }
-            ],
-            returns: {
-              type: 'String',
-              desc: 'the result is none'
-            },
-            example: 'reduce(a, b) => \'none\'',
-            filename: '/user/base.js'
-          }
-        ]
       }
     })
 
     onMounted(() => {
-      methods.formatDocs()
+      // methods.formatDocs()
     })
 
     return {

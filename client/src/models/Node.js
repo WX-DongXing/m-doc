@@ -11,7 +11,7 @@ export default class Node {
       title: { text: '' },
       desc: { text: '' }
     },
-    file = {},
+    comment = {},
     loc = {},
     fnList = [],
     children = []
@@ -27,7 +27,7 @@ export default class Node {
       title: { text: name },
       desc: { text: desc }
     }
-    this.file = file
+    this.comment = comment
     this.loc = loc
     this.fnList = fnList
     this.children = children

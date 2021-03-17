@@ -1,64 +1,76 @@
 <template>
-  <div class="doc-panel" v-if="docInfo">
-    <h3 class="doc-panel__title">{{ docInfo.title }}</h3>
+  <div class="doc-panel" v-for="(doc, index) in docs" :key="index">
+    <h3 class="doc-panel__title">{{ doc.title }}</h3>
 
-    <p class="doc-panel__desc">{{ docInfo.desc }}</p>
+    <p class="doc-panel__desc">{{ doc.desc }}</p>
 
-    <p class="doc-panel__subtitle">Params</p>
-    <div class="doc-panel__params">
-      <el-table
-        :data="docInfo.params"
-        border
-        size="small"
-        style="width: 100%">
-        <el-table-column
-          prop="type"
-          label="Type"
-          width="180">
-        </el-table-column>
-        <el-table-column
-          prop="value"
-          label="Value"
-          width="180">
-        </el-table-column>
-        <el-table-column
-          prop="desc"
-          label="Description">
-        </el-table-column>
-      </el-table>
+    <div v-if="doc.param">
+      <p class="doc-panel__subtitle">Params</p>
+      <div class="doc-panel__params">
+        <el-table
+          :data="doc.params"
+          border
+          size="small"
+          style="width: 100%">
+          <el-table-column
+            prop="type"
+            label="Type"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="value"
+            label="Value"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="desc"
+            label="Description">
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
 
-    <p class="doc-panel__subtitle">Returns</p>
-    <div class="doc-panel__content">
-      <p class="doc-panel__returns">
-        <b>{{ docInfo.returns.type }}: </b>
-        <span>{{ docInfo.returns.desc }}</span>
-      </p>
+    <div v-if="doc.returns">
+      <p class="doc-panel__subtitle">Returns</p>
+      <div class="doc-panel__content">
+        <p class="doc-panel__returns">
+          <b>{{ doc.returns.type }}: </b>
+          <span>{{ doc.returns.desc }}</span>
+        </p>
+      </div>
     </div>
 
-    <p class="doc-panel__subtitle">Example</p>
-    <div class="doc-panel__example">{{ docInfo.example }}</div>
+    <div v-if="doc.example">
+      <p class="doc-panel__subtitle">Example</p>
+      <div class="doc-panel__example">{{ doc.example }}</div>
+    </div>
 
     <p class="doc-panel__subtitle">Path</p>
     <div class="doc-panel__content">
-      <p class="doc-panel__filename">{{ docInfo.filename }}</p>
+      <p class="doc-panel__filename">{{ doc.file.filename }}</p>
     </div>
   </div>
 </template>
 
 <script>
-import { cloneDeep } from 'lodash'
-import { computed, reactive, toRefs } from 'vue'
+import { cloneDeep, uniqWith } from 'lodash'
+import { computed, reactive, toRefs, watch } from 'vue'
 
 export default {
   name: 'DocPanel',
-  props: ['doc'],
+  props: ['data'],
   setup (prop) {
-    const { doc } = toRefs(prop)
+    const { data } = toRefs(prop)
 
     const state = reactive({
-      docInfo: computed(() => cloneDeep(doc))
+      docs: []
     })
+
+    watch(data, (val) => {
+      const nodes = uniqWith(val.nodes || [], (val, other) => other.name === val.name && other.comment.file.filename === val.comment.file.filename)
+      state.docs = nodes.map(node => node.comment)
+      console.log(state.docs)
+    }, { immediate: true })
 
     return {
       ...toRefs(state)
