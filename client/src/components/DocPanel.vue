@@ -15,12 +15,12 @@
           <el-table-column
             prop="value"
             label="Value"
-            width="120">
+            width="180">
           </el-table-column>
           <el-table-column
             prop="type"
             label="Type"
-            width="120">
+            width="180">
           </el-table-column>
           <el-table-column
             prop="desc"
@@ -72,7 +72,6 @@ export default {
     watch(data, (val) => {
       const nodes = uniqWith(val.nodes || [], (val, other) => other.name === val.name && other.comment.file.filename === val.comment.file.filename)
       state.docs = nodes.map(node => node.comment)
-      console.log(state.docs)
     }, { immediate: true })
 
     return {
@@ -101,6 +100,7 @@ export default {
     flex-flow: column nowrap;
     justify-content: center;
     align-items: flex-start;
+    width: 100%;
   }
 
   &__title {

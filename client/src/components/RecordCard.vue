@@ -5,9 +5,18 @@
       <div class="record-card__map" ref="map"></div>
     </div>
     <div class="record-card__actions">
-      <i class="el-icon-delete" @click="handleRemove"></i>
-      <i class="el-icon-files" @click="handleSave"></i>
-      <i class="el-icon-toilet-paper" @click="handleClear"></i>
+      <el-tooltip class="item" effect="dark" content="保存" placement="right">
+        <i class="el-icon-files" @click="handleSave"></i>
+      </el-tooltip>
+      <el-tooltip class="item" effect="dark" content="清空" placement="right">
+        <i class="el-icon-toilet-paper" @click="handleClear"></i>
+      </el-tooltip>
+      <el-tooltip class="item" effect="dark" content="导出" placement="right">
+        <i class="el-icon-position"></i>
+      </el-tooltip>
+      <el-tooltip class="item" effect="dark" content="下载" placement="right">
+        <i class="el-icon-download"></i>
+      </el-tooltip>
     </div>
   </div>
 </template>
@@ -85,7 +94,6 @@ export default {
       handleUpdateRecord: () => {
         updateRecord({ id: data.value.id, record: state.record })
       },
-      handleRemove: () => emit('remove', { id: state.record.id }),
       handleSave: () => {
         const { cells } = state.graph.toJSON()
         const { nodes, edges } = cells.reduce((acc, cur) => {

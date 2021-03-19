@@ -28,9 +28,9 @@
     "m-doc": "bin/m-doc.js"
   },
   "scripts": {
-    "serve": "cd client && yarn serve",
+    "client": "cd client && yarn serve",
     "package": "cd client && yarn build",
-    "start": "nodemon bin/m-doc.js -no-browser"
+    "serve": "nodemon bin/m-doc.js -no-browser"
   },
   "nodemonConfig": {
     "ignore": ["client/*", "docs/*"]

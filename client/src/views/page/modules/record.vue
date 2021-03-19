@@ -22,7 +22,7 @@
         >
       </div>
       <div>
-        <i class="el-icon-close record__close" @click="handleRemoveRecord"></i>
+        <i class="el-icon-delete record__close" @click="handleRemoveRecord"></i>
         <i class="el-icon-plus record__close" @click="handleAddRecord"></i>
       </div>
     </header>
@@ -45,13 +45,14 @@
 
 <script>
 import { computed, onMounted, reactive, toRefs } from 'vue'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
 import { useStore } from 'vuex'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import Record from '@/models/Record'
 import RecordCard from '@/components/RecordCard'
 import DocPanel from '@/components/DocPanel'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'Record',
@@ -61,6 +62,7 @@ export default {
   },
   setup () {
     const store = useStore()
+    const router = useRouter()
 
     const [
       updateRecord, removeRecord, addRecord
@@ -72,27 +74,45 @@ export default {
 
     const state = reactive({
       socket: computed(() => store.state.socket),
-      activePage: computed(() => cloneDeep(store.getters.activePage || {})),
+      source: computed(() => store.state.source),
+      activePage: computed(() => store.getters.activePage || {}),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord || {})),
       tab: 'GRAPH',
       docs: []
     })
 
     const methods = reactive({
+      routerToPage: () => {
+        const { children, id } = state.activePage
+        if (children && children.length) {
+          router.push({ name: 'Record', params: { id, index: children.length - 1 } })
+        } else {
+          if (state.source.length) {
+            const page = state.source[state.source.length - 1]
+            router.push({ name: 'Overview', params: { id: page.id } })
+          } else {
+            router.push({ name: 'Empty' })
+          }
+        }
+      },
       handleUpdateRecord: () => {
         updateRecord({ id: state.activeRecord.id, record: state.activeRecord })
       },
       handleRemoveRecord: () => {
         removeRecord({ id: state.activeRecord.id })
+        methods.routerToPage()
       },
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
+        router.push({ name: 'Record', params: { id: state.activePage.id, index: state.activePage.children.length - 1 } })
       }
     })
 
     onMounted(() => {
-      // methods.formatDocs()
+      if (isEmpty(state.activePage) || isEmpty(state.activeRecord)) {
+        methods.routerToPage()
+      }
     })
 
     return {
@@ -142,6 +162,14 @@ export default {
   &__close {
     font-size: 24px;
     cursor: pointer;
+
+    &:hover {
+      color: $primary;
+    }
+
+    & + & {
+      margin-left: 16px;
+    }
   }
 
   &__title {

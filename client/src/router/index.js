@@ -16,7 +16,7 @@ const routes = [
     component: Page,
     children: [
       { path: '', redirect: '/page/empty' },
-      { path: '/page/empty', component: Empty },
+      { path: '/page/empty', name: 'Empty', component: Empty },
       {
         path: '/page/:id',
         component: EmptyLayout,

@@ -22,7 +22,7 @@
         >
       </div>
       <div>
-        <i class="el-icon-close overview__close" @click="handleRemovePage"></i>
+        <i class="el-icon-delete overview__close" @click="handleRemovePage"></i>
         <i class="el-icon-plus overview__close" @click="handleAddRecord"></i>
       </div>
     </header>
@@ -31,8 +31,8 @@
 
 <script>
 import { useStore } from 'vuex'
-import { computed, reactive, toRefs } from 'vue'
-import { cloneDeep } from 'lodash'
+import { computed, onMounted, reactive, toRefs } from 'vue'
+import { cloneDeep, isEmpty } from 'lodash'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import Record from '@/models/Record'
@@ -56,21 +56,37 @@ export default {
 
     const state = reactive({
       socket: computed(() => store.state.socket),
+      source: computed(() => store.state.source),
       activePage: computed(() => cloneDeep(store.getters.activePage || {}))
     })
 
     const methods = reactive({
+      routerToPage: () => {
+        if (state.source.length) {
+          const page = state.source[state.source.length - 1]
+          router.push({ name: 'Overview', params: { id: page.id } })
+        } else {
+          router.push({ name: 'Empty' })
+        }
+      },
       handleUpdatePage: () => {
         updatePage({ id: state.activePage.id, page: state.activePage })
       },
       handleRemovePage: () => {
         removePage({ id: state.activePage.id })
         setActivePage()
+        methods.routerToPage()
       },
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
         router.push({ name: 'Record', params: { id: state.activePage.id, index: state.activePage.children.length - 1 } })
+      }
+    })
+
+    onMounted(() => {
+      if (isEmpty(state.activePage)) {
+        methods.routerToPage()
       }
     })
 
@@ -114,6 +130,14 @@ export default {
   &__close {
     font-size: 24px;
     cursor: pointer;
+
+    &:hover {
+      color: $primary;
+    }
+
+    & + & {
+      margin-left: 16px;
+    }
   }
 
   &__title {
