@@ -12,7 +12,6 @@ export default class Node {
       desc: { text: '' }
     },
     comment = {},
-    loc = {},
     fnList = [],
     children = []
   }) {
@@ -28,7 +27,6 @@ export default class Node {
       desc: { text: desc }
     }
     this.comment = comment
-    this.loc = loc
     this.fnList = fnList
     this.children = children
   }

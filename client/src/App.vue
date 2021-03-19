@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { reactive, computed, toRefs, onMounted, onUnmounted, watch } from 'vue'
+import { reactive, computed, toRefs, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue'
 import { cloneDeep } from 'lodash'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
@@ -15,6 +15,7 @@ import { useRoute } from 'vue-router'
 
 export default {
   setup () {
+    const instance = getCurrentInstance()
     const store = useStore()
     const route = useRoute()
 
@@ -64,6 +65,13 @@ export default {
               record.nodes.push(new Node(JSON.parse(data)))
               updateRecord({ index: state.recordIndex, record })
             }
+            break
+          case 'NOTIFICATION': {
+            const message = JSON.parse(data)
+            instance.$notify(message)
+          }
+            break
+          default:
             break
         }
       })

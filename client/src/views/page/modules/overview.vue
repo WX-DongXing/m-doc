@@ -56,7 +56,8 @@ export default {
     ] = useMutations([
       MutationTypes.SET_ACTIVE_PAGE,
       MutationTypes.UPDATE_PAGE,
-      MutationTypes.REMOVE_PAGE
+      MutationTypes.REMOVE_PAGE,
+      MutationTypes.ADD_RECORD
     ])
 
     const state = reactive({
@@ -72,7 +73,6 @@ export default {
       handleRemovePage: () => {
         removePage({ id: state.activePage.id })
         setActivePage()
-        methods.routerToPage()
       },
       handleAddRecord: () => {
         const record = new Record({ parentId: state.activePage.id })

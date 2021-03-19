@@ -1,6 +1,12 @@
 <template>
   <div class="doc-panel" v-for="(doc, index) in docs" :key="index">
-    <h3 class="doc-panel__title">{{ doc.name }}</h3>
+    <div class="doc-panel__header">
+      <h3 class="doc-panel__title">{{ doc.name }}</h3>
+      <div class="doc-panel__editor">
+        <img :src="vscode" alt="" @click="handleOpenFile({ type: 'vscode', doc })">
+        <img :src="webstorm" alt="" @click="handleOpenFile({ type: 'webstorm', doc })">
+      </div>
+    </div>
 
     <p class="doc-panel__desc">{{ doc.desc }}</p>
 
@@ -48,6 +54,7 @@
       <p class="doc-panel__subtitle">Path</p>
       <div class="doc-panel__content">
         <p class="doc-panel__filename">{{ doc.file.filename }}</p>
+        <span class="doc-panel__position">{{ doc.loc.start.line }}:{{ doc.loc.start.column }}</span>
       </div>
     </div>
 
@@ -57,6 +64,8 @@
 <script>
 import { cloneDeep, uniqWith } from 'lodash'
 import { computed, reactive, toRefs, watch } from 'vue'
+import vscode from '@/assets/image/vscode.png'
+import webstorm from '@/assets/image/webstorm.png'
 
 export default {
   name: 'DocPanel',
@@ -65,8 +74,28 @@ export default {
     const { data } = toRefs(prop)
 
     const state = reactive({
+      vscode,
+      webstorm,
       docs: []
     })
+
+    const handleOpenFile = ({ type, doc: { file, loc: { start: { line, column } } } }) => {
+      const link = document.createElement('a')
+      const event = document.createEvent('MouseEvents')
+      event.initMouseEvent('click', true, true)
+      switch (type) {
+        case 'vscode':
+          link.href = `vscode://file/${file.filename}:${line}:${column}`
+          link.dispatchEvent(event)
+          break
+        case 'webstorm':
+          link.href = `webstorm://open?file=${file.filename}&line=${line}`
+          link.dispatchEvent(event)
+          break
+        default:
+          break
+      }
+    }
 
     watch(data, (val) => {
       const nodes = uniqWith(val.nodes || [], (val, other) => other.name === val.name && other.comment.file.filename === val.comment.file.filename)
@@ -74,7 +103,8 @@ export default {
     }, { immediate: true })
 
     return {
-      ...toRefs(state)
+      ...toRefs(state),
+      handleOpenFile
     }
   }
 }
@@ -94,6 +124,15 @@ export default {
   box-sizing: border-box;
   padding: 16px;
 
+  &__header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
   &__row {
     display: flex;
     flex-flow: column nowrap;
@@ -104,7 +143,32 @@ export default {
 
   &__title {
     font-size: 18px;
-    margin: 0 0 6px;
+    margin: 0;
+  }
+
+  &__editor{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    width: 120px;
+    height: 24px;
+
+    img {
+      height: 100%;
+      cursor: pointer;
+      opacity: 0;
+      transition: .35s ease-in-out;
+
+      &:nth-of-type(2) {
+        height: 20px;
+        margin-left: 12px;
+      }
+    }
+  }
+
+  &:hover &__editor img {
+    opacity: 1;
   }
 
   &__desc {
@@ -160,7 +224,8 @@ export default {
   &__content {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
     border-radius: 4px;
     border: 2px solid $back-color;
@@ -177,6 +242,10 @@ export default {
       color: $primary;
       text-decoration: underline;
     }
+  }
+
+  &__position {
+    color: $primary;
   }
 }
 </style>
