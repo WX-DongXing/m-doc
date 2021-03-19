@@ -178,7 +178,7 @@ export default {
   }
 
   &__close {
-    font-size: 24px;
+    font-size: 18px;
     cursor: pointer;
 
     &:hover {
@@ -206,6 +206,7 @@ export default {
   &__panel {
     display: flex;
     flex-flow: row nowrap;
+    height: 100%;
     overflow: auto;
   }
 

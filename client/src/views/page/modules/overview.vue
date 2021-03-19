@@ -124,7 +124,7 @@ export default {
   }
 
   &__close {
-    font-size: 24px;
+    font-size: 18px;
     cursor: pointer;
 
     &:hover {
