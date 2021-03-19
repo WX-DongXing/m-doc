@@ -29,15 +29,26 @@
 
     <el-tabs v-model="tab">
       <el-tab-pane label="流程图" name="GRAPH">
-        <record-card :data="activeRecord" v-if="activeRecord.id"></record-card>
+        <record-card :data="activeRecord"></record-card>
       </el-tab-pane>
-      <el-tab-pane label="文档" name="DOCS" class="record__panel">
-        <div class="record__docs">
-          <doc-panel :data="activeRecord" v-if="activeRecord.id"></doc-panel>
+      <el-tab-pane label="文档" name="DOCS">
+        <div class="record__panel" v-if="activeRecord.nodes.length">
+          <div class="record__docs">
+            <doc-panel :data="activeRecord"></doc-panel>
+          </div>
+          <div class="record__actions"></div>
         </div>
-        <div class="record__actions"></div>
+        <div class="record__none" v-else>
+          <i class="el-icon-document-remove"></i>
+          <p>无文档信息</p>
+        </div>
       </el-tab-pane>
-      <el-tab-pane label="Markdown" name="MARKDOWN">markdown</el-tab-pane>
+      <el-tab-pane label="Markdown" name="MARKDOWN">
+        <div class="record__none">
+          <i class="el-icon-c-scale-to-original"></i>
+          <p>无 Markdown 文件</p>
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </div>
 
@@ -206,7 +217,20 @@ export default {
 
   &__actions {
     flex: none;
-    width: 280px;
+    width: 320px;
+  }
+
+  &__none {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+
+    i {
+      font-size: 56px;
+    }
   }
 }
 
