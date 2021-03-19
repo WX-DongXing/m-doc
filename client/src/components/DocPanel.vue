@@ -10,8 +10,7 @@
         <el-table
           :data="doc.params"
           border
-          size="small"
-          style="width: 100%">
+          size="small">
           <el-table-column
             prop="value"
             label="Value"

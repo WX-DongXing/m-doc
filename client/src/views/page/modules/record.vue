@@ -1,5 +1,5 @@
 <template>
-  <div class="record">
+  <div class="record" v-if="activeRecord">
     <header>
       <div class="record__info">
         <input
@@ -39,12 +39,16 @@
       </el-tab-pane>
       <el-tab-pane label="Markdown" name="MARKDOWN">markdown</el-tab-pane>
     </el-tabs>
+  </div>
 
+  <div class="empty" v-else>
+    <i class="el-icon-reading"></i>
+    <p>暂无记录</p>
   </div>
 </template>
 
 <script>
-import { computed, onMounted, reactive, toRefs } from 'vue'
+import { computed, nextTick, onMounted, reactive, toRefs } from 'vue'
 import { cloneDeep, isEmpty } from 'lodash'
 import { useStore } from 'vuex'
 import { useMutations } from '@/utils'
@@ -52,7 +56,7 @@ import MutationTypes from '@/store/mutation-types'
 import Record from '@/models/Record'
 import RecordCard from '@/components/RecordCard'
 import DocPanel from '@/components/DocPanel'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   name: 'Record',
@@ -63,35 +67,38 @@ export default {
   setup () {
     const store = useStore()
     const router = useRouter()
+    const route = useRoute()
 
     const [
-      updateRecord, removeRecord, addRecord
+      updateRecord, removeRecord, addRecord,
+      setActivePage, setRecordIndex
     ] = useMutations([
       MutationTypes.UPDATE_RECORD,
       MutationTypes.REMOVE_RECORD,
-      MutationTypes.ADD_RECORD
+      MutationTypes.ADD_RECORD,
+      MutationTypes.SET_ACTIVE_PAGE,
+      MutationTypes.SET_RECORD_INDEX
     ])
 
     const state = reactive({
       socket: computed(() => store.state.socket),
       source: computed(() => store.state.source),
       activePage: computed(() => store.getters.activePage || {}),
-      activeRecord: computed(() => cloneDeep(store.getters.activeRecord || {})),
+      activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
       tab: 'GRAPH',
       docs: []
     })
 
     const methods = reactive({
       routerToPage: () => {
-        const { children, id } = state.activePage
-        if (children && children.length) {
-          router.push({ name: 'Record', params: { id, index: children.length - 1 } })
+        if (!state.source.length || isEmpty(state.activePage)) {
+          router.push({ name: 'Empty' })
         } else {
-          if (state.source.length) {
-            const page = state.source[state.source.length - 1]
-            router.push({ name: 'Overview', params: { id: page.id } })
+          if (state.activePage.children.length) {
+            const { children, id } = state.activePage
+            router.push({ name: 'Record', params: { id, index: children.length - 1 } })
           } else {
-            router.push({ name: 'Empty' })
+            router.push({ name: 'Overview', params: { id: state.activePage.id } })
           }
         }
       },
@@ -110,9 +117,9 @@ export default {
     })
 
     onMounted(() => {
-      if (isEmpty(state.activePage) || isEmpty(state.activeRecord)) {
-        methods.routerToPage()
-      }
+      const { id, index } = route.params
+      id && setActivePage({ id })
+      index >= 0 && setRecordIndex({ index })
     })
 
     return {
@@ -200,6 +207,19 @@ export default {
   &__actions {
     flex: none;
     width: 280px;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+
+  i {
+    font-size: 56px;
   }
 }
 </style>

@@ -10,7 +10,13 @@
         </div>
       </div>
       <div class="page__tree">
-        <el-tree :data="source" :props="treeProps" @node-click="handleNodeClick"></el-tree>
+        <el-tree
+          :data="source"
+          :props="treeProps"
+          node-key="id"
+          :default-expand-keys="[activePage.id, activeRecord.id]"
+          @node-click="handleNodeClick"
+        ></el-tree>
       </div>
     </aside>
 
@@ -22,8 +28,7 @@
 </template>
 
 <script>
-import { cloneDeep, throttle } from 'lodash'
-import { computed, reactive, toRefs, watch } from 'vue'
+import { computed, reactive, toRefs } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import MutationTypes from '@/store/mutation-types'
@@ -48,7 +53,8 @@ export default {
     const state = reactive({
       source: computed(() => store.state.source),
       socket: computed(() => store.state.socket),
-      activePage: computed(() => cloneDeep(store.getters.activePage)),
+      activePage: computed(() => store.getters.activePage || {}),
+      activeRecord: computed(() => store.getters.activeRecord || {}),
       treeProps: {
         children: 'children',
         label: 'title'

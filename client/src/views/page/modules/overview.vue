@@ -1,5 +1,5 @@
 <template>
-  <div class="overview">
+  <div class="overview" v-if="activePage">
     <header>
       <div class="overview__info">
         <input
@@ -27,22 +27,28 @@
       </div>
     </header>
   </div>
+
+  <div class="empty" v-else>
+    <i class="el-icon-menu"></i>
+    <p>暂无信息</p>
+  </div>
 </template>
 
 <script>
 import { useStore } from 'vuex'
 import { computed, onMounted, reactive, toRefs } from 'vue'
-import { cloneDeep, isEmpty } from 'lodash'
+import { cloneDeep } from 'lodash'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import Record from '@/models/Record'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
   name: 'Overview',
   setup () {
     const store = useStore()
     const router = useRouter()
+    const route = useRoute()
 
     const [
       setActivePage, updatePage, removePage,
@@ -50,25 +56,16 @@ export default {
     ] = useMutations([
       MutationTypes.SET_ACTIVE_PAGE,
       MutationTypes.UPDATE_PAGE,
-      MutationTypes.REMOVE_PAGE,
-      MutationTypes.ADD_RECORD
+      MutationTypes.REMOVE_PAGE
     ])
 
     const state = reactive({
       socket: computed(() => store.state.socket),
       source: computed(() => store.state.source),
-      activePage: computed(() => cloneDeep(store.getters.activePage || {}))
+      activePage: computed(() => cloneDeep(store.getters.activePage))
     })
 
     const methods = reactive({
-      routerToPage: () => {
-        if (state.source.length) {
-          const page = state.source[state.source.length - 1]
-          router.push({ name: 'Overview', params: { id: page.id } })
-        } else {
-          router.push({ name: 'Empty' })
-        }
-      },
       handleUpdatePage: () => {
         updatePage({ id: state.activePage.id, page: state.activePage })
       },
@@ -85,9 +82,8 @@ export default {
     })
 
     onMounted(() => {
-      if (isEmpty(state.activePage)) {
-        methods.routerToPage()
-      }
+      const { id } = route.params
+      id && setActivePage({ id })
     })
 
     return {
@@ -151,6 +147,19 @@ export default {
     color: #2c3e50;
     font-size: 14px;
     margin: 0;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+
+  i {
+    font-size: 56px;
   }
 }
 </style>
