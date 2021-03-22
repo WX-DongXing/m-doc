@@ -71,7 +71,7 @@ export default {
             break
           case 'MARKDOWN_RESULT':
             if (state.activePage && state.activeRecord) {
-              updateRecord({ id: state.activeRecord.id, record: { html: data } })
+              updateRecord({ id: state.activeRecord.id, record: { content: data } })
             }
             break
           default:

@@ -45,7 +45,7 @@
       </el-tab-pane>
       <el-tab-pane label="Markdown" name="MARKDOWN">
         <div class="record__panel" v-if="activeRecord.nodes.length">
-          <markdown-panel @changed="handleMarkdown" v-model="content" :html="activeRecord.html" />
+          <markdown-panel v-model="content" />
         </div>
         <div class="record__none" v-else>
           <i class="el-icon-c-scale-to-original"></i>
@@ -137,9 +137,6 @@ export default {
         const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
         router.push({ name: 'Record', params: { id: state.activePage.id, index: state.activePage.children.length - 1 } })
-      },
-      handleMarkdown: (content) => {
-        state.socket.emit('PARSE_MARKDOWN', content)
       }
     })
 

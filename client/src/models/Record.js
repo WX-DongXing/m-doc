@@ -8,8 +8,7 @@ export default class Record {
     cells = [],
     nodes = [],
     edges = [],
-    content = '',
-    html = ''
+    content = ''
   }) {
     this.id = shortid.generate()
     this.parentId = parentId
@@ -20,6 +19,5 @@ export default class Record {
     this.nodes = nodes
     this.edges = edges
     this.content = content
-    this.html = html
   }
 }

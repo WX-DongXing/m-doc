@@ -7,24 +7,35 @@
 </template>
 
 <script>
-import { toRefs, watch } from 'vue'
-import { throttle } from 'lodash'
+import { ref, toRefs, watch } from 'vue'
+import marked from 'marked'
+import hl from 'highlight.js'
+import 'highlight.js/scss/vs.scss'
 
 export default {
   name: 'MarkdownPanel',
-  props: ['modelValue', 'html'],
+  props: ['modelValue'],
   setup (props, { emit }) {
     const { modelValue } = toRefs(props)
+    const html = ref('')
+    marked.setOptions({
+      breaks: true,
+      highlight: function (code, language) {
+        const validLanguage = hl.getLanguage(language) ? language : 'plaintext'
+        return hl.highlight(validLanguage, code).value
+      }
+    })
 
     const handleContentChange = (event) => {
       emit('update:modelValue', event.target.value)
     }
 
-    watch(modelValue, throttle(val => {
-      emit('changed', val)
-    }, 200))
+    watch(modelValue, (val) => {
+      html.value = marked(val)
+    }, { immediate: true })
 
     return {
+      html,
       handleContentChange
     }
   }
@@ -44,8 +55,10 @@ export default {
     outline: none;
     box-sizing: border-box;
     padding: 16px;
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 32px;
     resize: none;
+    border-radius: 4px;
     font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
   }
 
@@ -54,7 +67,7 @@ export default {
     box-sizing: border-box;
     padding: 16px;
     text-align: left;
-    background: whitesmoke;
+    background: white;
     overflow: auto;
   }
 }
