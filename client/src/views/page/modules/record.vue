@@ -44,7 +44,10 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="Markdown" name="MARKDOWN">
-        <div class="record__none">
+        <div class="record__panel" v-if="activeRecord.nodes.length">
+          <markdown-panel @changed="handleMarkdown" v-model="content" :html="activeRecord.html" />
+        </div>
+        <div class="record__none" v-else>
           <i class="el-icon-c-scale-to-original"></i>
           <p>无 Markdown 文件</p>
         </div>
@@ -59,21 +62,23 @@
 </template>
 
 <script>
-import { computed, nextTick, onMounted, reactive, toRefs } from 'vue'
+import { computed, onMounted, reactive, toRefs } from 'vue'
 import { cloneDeep, isEmpty } from 'lodash'
 import { useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
 import Record from '@/models/Record'
 import RecordCard from '@/components/RecordCard'
 import DocPanel from '@/components/DocPanel'
-import { useRoute, useRouter } from 'vue-router'
+import MarkdownPanel from '@/components/MarkdownPanel'
 
 export default {
   name: 'Record',
   components: {
     RecordCard,
-    DocPanel
+    DocPanel,
+    MarkdownPanel
   },
   setup () {
     const store = useStore()
@@ -97,7 +102,15 @@ export default {
       activePage: computed(() => store.getters.activePage || {}),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
       tab: 'GRAPH',
-      docs: []
+      docs: [],
+      content: computed({
+        get () {
+          return store.getters.activeRecord?.content
+        },
+        set (content) {
+          updateRecord({ id: state.activeRecord.id, record: { content } })
+        }
+      })
     })
 
     const methods = reactive({
@@ -124,6 +137,9 @@ export default {
         const record = new Record({ parentId: state.activePage.id })
         addRecord({ record })
         router.push({ name: 'Record', params: { id: state.activePage.id, index: state.activePage.children.length - 1 } })
+      },
+      handleMarkdown: (content) => {
+        state.socket.emit('PARSE_MARKDOWN', content)
       }
     })
 

@@ -62,8 +62,8 @@
 </template>
 
 <script>
-import { cloneDeep, uniqWith } from 'lodash'
-import { computed, reactive, toRefs, watch } from 'vue'
+import { uniqWith } from 'lodash'
+import { reactive, toRefs, watch } from 'vue'
 import vscode from '@/assets/image/vscode.png'
 import webstorm from '@/assets/image/webstorm.png'
 

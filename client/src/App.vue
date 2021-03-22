@@ -51,7 +51,7 @@ export default {
       })
 
       state.socket.addEventListener('message', message => {
-        const [event, data] = message.data.split('|')
+        const [source, event, split, data] = message.data.match(/([A-Z_]+)(\|)([\s\S]+)?/)
         switch (event) {
           case 'UPDATE':
             updateSource(JSON.parse(data))
@@ -66,10 +66,13 @@ export default {
               updateRecord({ index: state.recordIndex, record })
             }
             break
-          case 'NOTIFICATION': {
-            const message = JSON.parse(data)
-            instance.$notify(message)
-          }
+          case 'NOTIFICATION':
+            instance.$notify(JSON.parse(data))
+            break
+          case 'MARKDOWN_RESULT':
+            if (state.activePage && state.activeRecord) {
+              updateRecord({ id: state.activeRecord.id, record: { html: data } })
+            }
             break
           default:
             break
