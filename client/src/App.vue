@@ -135,4 +135,12 @@ main {
   height: 100vh;
   width: 100%;
 }
+
+.cm-editor {
+  height: 100%;
+
+  &.cm-focused {
+    outline: none
+  }
+}
 </style>
