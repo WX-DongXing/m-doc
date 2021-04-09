@@ -101,7 +101,7 @@ export default {
       source: computed(() => store.state.source),
       activePage: computed(() => store.getters.activePage || {}),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
-      tab: 'GRAPH',
+      tab: 'MARKDOWN',
       docs: [],
       content: computed({
         get () {
