@@ -21,13 +21,13 @@ export default {
     const { modelValue } = toRefs(props)
 
     const store = reactive({
+      parser: new DOMParser(),
       editor: null,
       render: null,
       view: null,
       html: '',
       doc: modelValue.value,
-      source: [],
-      tagNames: []
+      source: []
     })
 
     marked.setOptions({
@@ -38,72 +38,34 @@ export default {
       }
     })
 
-    const handleLineSource = () => {
-      store.source = []
-      store.tagNames = [0]
-      const lines = store.doc.split('\n')
-      if (lines.length && store.render) {
-        let index = 0
-        let top = 0
-        let childIndex = 0
-        const rect = store.render.getBoundingClientRect()
-        for (const line of lines) {
-          if (!line.trim()) {
-            store.source.push(top)
-            continue
-          }
-          const element = store.render.children[index]
-          const elementRect = element.getBoundingClientRect()
-          if (element && /(BLOCKQUOTE|PRE|TABLE|UL|OL)/.test(element.tagName)) {
-            let size = 0
-            let lineHeight
-            if (/BLOCKQUOTE/.test(element.tagName)) {
-              lineHeight = 24
-              size = Math.floor(elementRect.height / lineHeight)
-            }
-            if (/PRE/.test(element.tagName)) {
-              lineHeight = 17.5
-              size = Math.floor(elementRect.height / lineHeight)
-            }
-            if (/TABLE/.test(element.tagName)) {
-              lineHeight = 36
-              size = Math.floor(elementRect.height / lineHeight)
-            }
-            if (/(UL|OL)/.test(element.tagName)) {
-              lineHeight = 26
-              size = Math.floor(elementRect.height / lineHeight)
-            }
-            top += lineHeight
-            childIndex += 1
-            if (childIndex > size - 1) {
-              childIndex = 0
-              index += 1
-            }
-            store.source.push(top)
-            store.tagNames.push(element.tagName)
-          } else {
-            top = elementRect.top - rect.top
-            index += 1
-            store.source.push(top)
-            store.tagNames.push('common')
-          }
-        }
-        // console.log('lines: ', lines)
-        // console.log('source: ', store.source)
-        // console.log('element: ', store.render.children)
-      }
-    }
-
-    const handleScroll = (event) => {
-      if (store.source.length === 1) {
-        handleLineSource()
-      }
+    const handleScroll = () => {
       const [container] = document.getElementsByClassName('cm-scroller')
       const line = Math.round(container.scrollTop / 22)
-      const top = store.source[line]
-      const tagName = store.tagNames[line]
-      console.log(line, tagName)
+      const text = new Array(line).fill('').reduce((acc, cur, index) => {
+        acc += (store.view.state.doc.line(index + 1).text + '\n')
+        return acc
+      }, '')
+      const doc = store.parser.parseFromString(marked(text), 'text/html')
+      const elements = doc.body.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, hr, table, div')
+      const top = store.source[elements.length]
       store.render.scroll(0, top)
+    }
+
+    const getLinesTop = () => {
+      const elements = store.render?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, hr, table, div') || []
+      if (!elements.length || !store.render) {
+        return
+      }
+      const { top } = store.render.getBoundingClientRect()
+      let offset = 0
+      store.source = [...elements].map((element, index) => {
+        const { top: elementTop } = element.getBoundingClientRect()
+        const lineTop = elementTop - top
+        if (index === 0 && lineTop !== 0) {
+          offset = lineTop
+        }
+        return lineTop - offset
+      })
     }
 
     onMounted(() => {
@@ -128,6 +90,8 @@ export default {
         parent: store.editor
       })
 
+      getLinesTop()
+
       const [container] = document.getElementsByClassName('cm-scroller')
       container.addEventListener('scroll', handleScroll)
     })
@@ -139,7 +103,7 @@ export default {
 
     watch(modelValue, (val) => {
       store.html = marked(val)
-      handleLineSource()
+      getLinesTop()
     }, { immediate: true })
 
     return {
