@@ -45,7 +45,7 @@
           <p>无文档信息</p>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="Markdown" name="MARKDOWN">
+      <el-tab-pane label="Markdown" name="MARKDOWN" lazy>
         <div class="record__panel" v-if="activeRecord.nodes.length">
           <markdown-panel v-model="content" />
         </div>
@@ -111,7 +111,7 @@ export default {
       }),
       comments: computed(() => (state.nodes || []).map(node => node.comment)),
       anchors: computed(() => (state.nodes || []).map(node => node.name)),
-      tab: 'DOCS',
+      tab: 'GRAPH',
       content: computed({
         get () {
           return store.getters.activeRecord?.content
