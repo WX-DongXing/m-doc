@@ -62,21 +62,17 @@
 </template>
 
 <script>
-import { uniqWith } from 'lodash'
-import { reactive, toRefs, watch } from 'vue'
+import { reactive, toRefs } from 'vue'
 import vscode from '@/assets/image/vscode.png'
 import webstorm from '@/assets/image/webstorm.png'
 
 export default {
   name: 'DocPanel',
-  props: ['data'],
-  setup (prop) {
-    const { data } = toRefs(prop)
-
+  props: ['docs'],
+  setup () {
     const state = reactive({
       vscode,
-      webstorm,
-      docs: []
+      webstorm
     })
 
     const handleOpenFile = ({ type, doc: { file, loc: { start: { line, column } } } }) => {
@@ -96,11 +92,6 @@ export default {
           break
       }
     }
-
-    watch(data, (val) => {
-      const nodes = uniqWith(val.nodes || [], (val, other) => other.name === val.name && other.comment.file.filename === val.comment.file.filename)
-      state.docs = nodes.map(node => node.comment)
-    }, { immediate: true })
 
     return {
       ...toRefs(state),

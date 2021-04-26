@@ -34,9 +34,11 @@
       <el-tab-pane label="文档" name="DOCS">
         <div class="record__panel" v-if="activeRecord.nodes.length">
           <div class="record__docs">
-            <doc-panel :data="activeRecord"></doc-panel>
+            <doc-panel :docs="comments"></doc-panel>
           </div>
-          <div class="record__actions"></div>
+          <div class="record__actions">
+            <anchor :value="anchors"/>
+          </div>
         </div>
         <div class="record__none" v-else>
           <i class="el-icon-document-remove"></i>
@@ -63,11 +65,12 @@
 
 <script>
 import { computed, onMounted, reactive, toRefs } from 'vue'
-import { cloneDeep, isEmpty } from 'lodash'
+import { cloneDeep, isEmpty, uniqWith } from 'lodash'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { useMutations } from '@/utils'
 import MutationTypes from '@/store/mutation-types'
+import Anchor from '@/components/Anchor'
 import Record from '@/models/Record'
 import RecordCard from '@/components/RecordCard'
 import DocPanel from '@/components/DocPanel'
@@ -76,6 +79,7 @@ import MarkdownPanel from '@/components/MarkdownPanel'
 export default {
   name: 'Record',
   components: {
+    Anchor,
     RecordCard,
     DocPanel,
     MarkdownPanel
@@ -101,8 +105,13 @@ export default {
       source: computed(() => store.state.source),
       activePage: computed(() => store.getters.activePage || {}),
       activeRecord: computed(() => cloneDeep(store.getters.activeRecord)),
-      tab: 'MARKDOWN',
-      docs: [],
+      nodes: computed(() => {
+        const nodes = uniqWith(state.activeRecord?.nodes || [], (val, other) => other.name === val.name && other.comment.file.filename === val.comment.file.filename)
+        return nodes || []
+      }),
+      comments: computed(() => (state.nodes || []).map(node => node.comment)),
+      anchors: computed(() => (state.nodes || []).map(node => node.name)),
+      tab: 'DOCS',
       content: computed({
         get () {
           return store.getters.activeRecord?.content
@@ -174,7 +183,9 @@ export default {
   }
 
   .el-tab-pane {
-    height: calc(100vh - 160px);
+    box-sizing: border-box;
+    padding: 12px 0;
+    height: calc(100vh - 184px);
   }
 
   &__info {
@@ -195,7 +206,7 @@ export default {
     cursor: pointer;
 
     &:hover {
-      color: $primary;
+      color: $primary-dark;
     }
 
     & + & {
@@ -204,7 +215,7 @@ export default {
   }
 
   &__title {
-    color: $primary;
+    color: $primary-dark;
     font-size: 20px;
     font-weight: bold;
     margin: 12px 0 6px 0;
@@ -221,6 +232,7 @@ export default {
     flex-flow: row nowrap;
     height: 100%;
     overflow: auto;
+    scroll-behavior: smooth;
   }
 
   &__docs {
@@ -232,6 +244,8 @@ export default {
   &__actions {
     flex: none;
     width: 320px;
+    box-sizing: border-box;
+    padding-left: 24px;
   }
 
   &__none {
