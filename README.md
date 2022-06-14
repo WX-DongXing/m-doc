@@ -2,7 +2,17 @@
 
 <div align="center">
 适配 Vue2 项目的方法流程文档工具
+
+![github][github] ![npm][npm] ![jetBrains][jetBrains]
 </div>
+
+
+![preview](./screenshots/preview.gif)
+
+
+[github]:https://img.shields.io/github/license/WX-DongXing/m-doc
+[npm]:https://img.shields.io/npm/v/@wx-xingdong/m-doc?style=flat&logo=npm
+[jetBrains]:https://img.shields.io/badge/thanks-JetBrains-%23000?style=flat&logo=jetBrains
 
 ## ✨ 特性
 
